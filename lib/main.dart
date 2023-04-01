@@ -70,14 +70,18 @@ class ChatPageState extends State<ChatPage> {
       ),
       body: Column(
         children: [
-          Expanded(
+          Flexible(
+              child: Container(
+            decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("assets/images/chatgpt.png"))),
             child: ListView.builder(
               padding: const EdgeInsets.all(8.0),
               reverse: true,
               itemBuilder: (context, index) => messages_[index],
               itemCount: messages_.length,
             ),
-          ),
+          )),
           Container(
             color: Colors.white,
             margin: const EdgeInsets.only(top: 5, bottom: 5),
