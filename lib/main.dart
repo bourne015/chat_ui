@@ -83,9 +83,18 @@ class ChatPageState extends State<ChatPage> {
             ),
           )),
           Container(
-            color: Colors.white,
-            margin: const EdgeInsets.only(top: 5, bottom: 5),
-            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                  bottomLeft: Radius.circular(15),
+                  bottomRight: Radius.circular(15),
+                )),
+            margin:
+                const EdgeInsets.only(left: 25, right: 25, top: 5, bottom: 15),
+            padding:
+                const EdgeInsets.only(left: 15, right: 5, top: 1, bottom: 1),
             child: Row(
               children: [
                 Expanded(
@@ -93,7 +102,13 @@ class ChatPageState extends State<ChatPage> {
                     decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.blue[50],
-                        border: const OutlineInputBorder(),
+                        border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15),
+                          topRight: Radius.circular(15),
+                          bottomLeft: Radius.circular(15),
+                          bottomRight: Radius.circular(15),
+                        )),
                         hintText: 'Type your message here'),
                     controller: myController,
                   ),
