@@ -67,6 +67,17 @@ class ChatPageState extends State<ChatPage> {
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: const Text('Chat'),
+        actions: <Widget>[
+          IconButton(
+              tooltip: "About",
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text(
+                        "A Demo for ChatGPT-3.5, the token is limited, "
+                        "Please refresh the page if don't need question context")));
+              },
+              icon: const Icon(Icons.info))
+        ],
       ),
       body: Column(
         children: [
