@@ -35,6 +35,7 @@ class ChatPageState extends State<ChatPage> {
   String url = "http://";
 
   void _submitText(String text) async {
+    String? content;
     myController.clear();
     messagesVal_.add({"role": "user", "content": text});
     setState(() {
@@ -47,10 +48,18 @@ class ChatPageState extends State<ChatPage> {
           ));
     });
 
-    //final response = await dio.post(url, data: {"content": text});
-    final response = await dio.post(url, data: messagesVal_);
-    final result = response.data.toString();
-    messagesVal_.add({"role": "assistant", "content": result});
+    try {
+      //final response = await dio.post(url, data: {"content": text});
+      final response = await dio.post(url, data: messagesVal_);
+      if (response.statusCode == 200) {
+        content = response.data["choices"][0]["message"]["content"];
+      } else {
+        content = response.data;
+      }
+    } catch (e) {
+      content = e.toString();
+    }
+    messagesVal_.add({"role": "assistant", "content": content});
     setState(() {
       messages_.insert(
           0,
