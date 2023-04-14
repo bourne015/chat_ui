@@ -33,6 +33,7 @@ class ChatPageState extends State<ChatPage> {
   final List<Map> messagesVal_ = [];
   final dio = Dio();
   String url = "http://";
+  String tokenSpent_ = "";
 
   void _submitText(String text) async {
     String? content;
@@ -53,6 +54,10 @@ class ChatPageState extends State<ChatPage> {
       final response = await dio.post(url, data: messagesVal_);
       if (response.statusCode == 200) {
         content = response.data["choices"][0]["message"]["content"];
+        var token = response.data["usage"]["total_tokens"].toString();
+        setState(() {
+          tokenSpent_ = "[$token/4096]";
+        });
       } else {
         content = response.data;
       }
@@ -75,15 +80,30 @@ class ChatPageState extends State<ChatPage> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Chat'),
+        title: RichText(
+            text: TextSpan(children: [
+          const TextSpan(
+              text: "Chat  ",
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          TextSpan(
+              text: tokenSpent_,
+              style: const TextStyle(
+                  fontSize: 9.5,
+                  //fontStyle: FontStyle.normal,
+                  color: Colors.grey))
+        ])),
         actions: <Widget>[
           IconButton(
               tooltip: "About",
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text(
-                        "A Demo for ChatGPT-3.5, the token is limited, "
-                        "Please refresh the page if don't need question context")));
+                    content:
+                        Text("A Demo for ChatGPT-3.5, the token is limited, "
+                            "Please refresh the page if reached max tokens"
+                            "or don't need question context")));
               },
               icon: const Icon(Icons.info))
         ],
