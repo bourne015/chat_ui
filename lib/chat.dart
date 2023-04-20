@@ -2,23 +2,78 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  ChatPage(
+      {Key? key,
+      required this.id,
+      required this.onTokenChanged,
+      required this.onReceivedMsg})
+      : super(key: key);
+
+  final String id;
+  final Function onReceivedMsg;
+  final Function onTokenChanged;
+
+  List<Widget> messages_ = [];
+  List<Map> messagesVal_ = [];
+  var myController = TextEditingController();
+  final dio = Dio();
+  String tokenSpent_ = '';
+
+  void clearMessages() {
+    messages_.clear();
+    messagesVal_.clear();
+  }
+
+  void setToken(val) {
+    tokenSpent_ = val;
+  }
+
+  void addMsg(val) {
+    messagesVal_.add(val);
+    messages_.insert(
+        0,
+        Container(
+          alignment: Alignment.centerRight,
+          child: MessageBox(val: val),
+        ));
+  }
 
   @override
   State createState() => ChatBody();
 }
 
 class ChatBody extends State<ChatPage> {
-  final myController = TextEditingController();
-  final List<Widget> messages_ = [];
-  final List<Map> messagesVal_ = [];
-  final dio = Dio();
+  static GlobalKey chatKey = GlobalKey();
   String url = "http://";
-  String tokenSpent_ = "";
+  String? content;
+  String tokenSpent_ = '';
+
+  static currentState() {
+    var state = ChatBody.chatKey.currentContext?.findAncestorStateOfType();
+    return state;
+  }
+
+  void refreshMessages() {
+    setState(() {});
+  }
+
+  void handleMessages(chatPages, id) {
+    setState(() {
+      for (var page in chatPages) {
+        if (page.id == id) {
+          page.addMsg({"role": "assistant", "content": content});
+          page.setToken(tokenSpent_);
+          widget.onTokenChanged(id);
+          break;
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      key: chatKey,
       children: [
         Flexible(
             child: Container(
@@ -26,10 +81,11 @@ class ChatBody extends State<ChatPage> {
               image: DecorationImage(
                   image: AssetImage("assets/images/chatgpt_green.png"))),
           child: ListView.builder(
+            key: UniqueKey(),
             padding: const EdgeInsets.all(8.0),
             reverse: true,
-            itemBuilder: (context, index) => messages_[index],
-            itemCount: messages_.length,
+            itemBuilder: (context, index) => widget.messages_[index],
+            itemCount: widget.messages_.length,
           ),
         )),
         Container(
@@ -59,12 +115,15 @@ class ChatBody extends State<ChatPage> {
                         bottomRight: Radius.circular(15),
                       )),
                       hintText: 'Type your message here'),
-                  controller: myController,
+                  controller: widget.myController,
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.send),
-                onPressed: () => _submitText(myController.text),
+                onPressed: () => _submitText(
+                  widget.myController.text,
+                  widget.id,
+                ),
               ),
             ],
           ),
@@ -73,44 +132,30 @@ class ChatBody extends State<ChatPage> {
     );
   }
 
-  void _submitText(String text) async {
-    String? content;
-    myController.clear();
-    messagesVal_.add({"role": "user", "content": text});
+  void _submitText(String text, String id) async {
+    //String? content;
+    widget.myController.clear();
+
     setState(() {
-      messages_.insert(
-          0,
-          Container(
-            alignment: Alignment.centerRight,
-            //child: MessageBox(content: text, role: "user"),
-            child: MessageBox(val: messagesVal_.last),
-          ));
+      widget.addMsg({"role": "user", "content": text});
     });
 
     try {
       //final response = await dio.post(url, data: {"content": text});
-      final response = await dio.post(url, data: messagesVal_);
+      final response = await widget.dio.post(url, data: widget.messagesVal_);
       if (response.statusCode == 200) {
         content = response.data["choices"][0]["message"]["content"];
         var token = response.data["usage"]["total_tokens"].toString();
-        setState(() {
-          tokenSpent_ = "[$token/4096]";
-        });
+        widget.tokenSpent_ = "$token/4096";
+        tokenSpent_ = "$token/4096";
       } else {
         content = response.data;
       }
     } catch (e) {
       content = e.toString();
     }
-    messagesVal_.add({"role": "assistant", "content": content});
-    setState(() {
-      messages_.insert(
-          0,
-          Container(
-            alignment: Alignment.centerRight,
-            child: MessageBox(val: messagesVal_.last),
-          ));
-    });
+
+    widget.onReceivedMsg(id, tokenSpent_);
   }
 }
 
