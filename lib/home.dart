@@ -13,6 +13,7 @@ class InitPageState extends State<InitPage> {
   List<ChatPage> chatPages = [];
   late ChatPage chatPage;
   late String selectedChatPageId = '0';
+  late int maxChatPageId = 0;
   late String tokenTitle = '';
 
   @override
@@ -92,7 +93,7 @@ class InitPageState extends State<InitPage> {
                 fontWeight: FontWeight.bold,
                 color: Colors.white)),
         TextSpan(
-            text: chatPage.tokenSpent_,
+            text: selectedChatPageId == chatPage.id ? chatPage.tokenSpent_ : "",
             style: const TextStyle(
                 fontSize: 9.5,
                 //fontStyle: FontStyle.normal,
@@ -132,15 +133,16 @@ class InitPageState extends State<InitPage> {
                 minLeadingWidth: 0,
                 title: const Text('New Chat'),
                 onTap: () {
-                  setState(() {
-                    final newId = chatPages.length;
-                    final newPage = ChatPage(
-                        id: newId.toString(),
-                        onTokenChanged: handleTokenChange,
-                        onReceivedMsg: handleReceiveMsg);
-                    chatPages.add(newPage);
-                    updateChatPage(newPage.id);
-                  });
+                  //setState(() {
+                  final newId = maxChatPageId + 1;
+                  maxChatPageId++;
+                  final newPage = ChatPage(
+                      id: newId.toString(),
+                      onTokenChanged: handleTokenChange,
+                      onReceivedMsg: handleReceiveMsg);
+                  chatPages.add(newPage);
+                  updateChatPage(newPage.id);
+                  //});
                   Navigator.pop(context);
                 },
               ),
@@ -165,11 +167,25 @@ class InitPageState extends State<InitPage> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 35),
                   title: Text("Chat ${page.id}"),
                   onTap: () {
-                    setState(() {
-                      updateChatPage(page.id);
-                      Navigator.pop(context);
-                    });
+                    updateChatPage(page.id);
+                    Navigator.pop(context);
                   },
+                  //always keep chat 0
+                  trailing: index > 0
+                      ? Row(mainAxisSize: MainAxisSize.min, children: [
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              var removeId = page.id;
+                              chatPages.removeAt(index);
+                              if (removeId == selectedChatPageId) {
+                                updateChatPage(chatPages[0].id);
+                              }
+                              setState(() {});
+                            },
+                          ),
+                        ])
+                      : null,
                 );
               },
             ),
