@@ -128,32 +128,36 @@ class InitPageState extends State<InitPage> {
           // ),
           Column(
             children: [
-              ListTile(
-                leading: const Icon(Icons.add),
-                minLeadingWidth: 0,
-                title: const Text('New Chat'),
-                onTap: () {
-                  //setState(() {
-                  final newId = maxChatPageId + 1;
-                  maxChatPageId++;
-                  final newPage = ChatPage(
-                      id: newId.toString(),
-                      onTokenChanged: handleTokenChange,
-                      onReceivedMsg: handleReceiveMsg);
-                  chatPages.add(newPage);
-                  updateChatPage(newPage.id);
-                  //});
-                  Navigator.pop(context);
-                },
-              ),
+              Container(
+                  decoration: const BoxDecoration(
+                      color: Color.fromARGB(255, 224, 221, 221),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                        bottomLeft: Radius.circular(15),
+                        bottomRight: Radius.circular(15),
+                      )),
+                  margin: const EdgeInsets.only(
+                      left: 15, right: 15, top: 10, bottom: 10),
+                  child: ListTile(
+                    leading: const Icon(Icons.add),
+                    minLeadingWidth: 0,
+                    title: const Text('New Chat'),
+                    onTap: () {
+                      //setState(() {
+                      final newId = maxChatPageId + 1;
+                      maxChatPageId++;
+                      final newPage = ChatPage(
+                          id: newId.toString(),
+                          onTokenChanged: handleTokenChange,
+                          onReceivedMsg: handleReceiveMsg);
+                      chatPages.add(newPage);
+                      updateChatPage(newPage.id);
+                      //});
+                      Navigator.pop(context);
+                    },
+                  )),
             ],
-          ),
-          const Divider(
-            height: 20,
-            thickness: 1,
-            indent: 10,
-            endIndent: 10,
-            color: Color.fromARGB(255, 186, 182, 182),
           ),
           Expanded(
             child: ListView.builder(
@@ -164,7 +168,7 @@ class InitPageState extends State<InitPage> {
                 return ListTile(
                   leading: const Icon(Icons.chat),
                   minLeadingWidth: 0,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 35),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 30),
                   title: Text("Chat ${page.id}"),
                   onTap: () {
                     updateChatPage(page.id);
