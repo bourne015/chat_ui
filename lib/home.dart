@@ -52,8 +52,8 @@ class InitPageState extends State<InitPage> {
     }
   }
 
-  void handleReceiveMsg(id, token) {
-    ChatBody.currentState()?.handleMessages(chatPages, id);
+  void handleReceiveMsg(id, token, append) {
+    ChatBody.currentState()?.handleMessages(chatPages, id, append);
     // setState(() {
     //   tokenTitle = token;
     // });

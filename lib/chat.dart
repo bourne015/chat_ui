@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'dart:convert';
 
 class ChatPage extends StatefulWidget {
   ChatPage(
@@ -38,6 +39,14 @@ class ChatPage extends StatefulWidget {
         ));
   }
 
+  void appMsg(val) {
+    messagesVal_[messagesVal_.length - 1]["content"] = val;
+    messages_[messages_.length - 1] = Container(
+      alignment: Alignment.centerRight,
+      child: MessageBox(val: val),
+    );
+  }
+
   @override
   State createState() => ChatBody();
 }
@@ -45,7 +54,7 @@ class ChatPage extends StatefulWidget {
 class ChatBody extends State<ChatPage> {
   static GlobalKey chatKey = GlobalKey();
   String url = "http://";
-  String? content;
+  String content = '';
   String tokenSpent_ = '';
 
   static currentState() {
@@ -57,12 +66,16 @@ class ChatBody extends State<ChatPage> {
     setState(() {});
   }
 
-  void handleMessages(chatPages, id) {
+  void handleMessages(chatPages, id, append) {
     setState(() {
       for (var page in chatPages) {
         if (page.id == id) {
-          page.addMsg({"role": "assistant", "content": content});
-          page.setToken(tokenSpent_);
+          if (append == false) {
+            page.addMsg({"role": "assistant", "content": content});
+          } else {
+            page.appMsg(content);
+          }
+          //page.setToken(tokenSpent_);
           widget.onTokenChanged(id);
           break;
         }
@@ -137,6 +150,7 @@ class ChatBody extends State<ChatPage> {
 
   void _submitText(String text, String id) async {
     //String? content;
+    bool append = false;
     widget.myController.clear();
 
     setState(() {
@@ -145,20 +159,33 @@ class ChatBody extends State<ChatPage> {
 
     try {
       //final response = await dio.post(url, data: {"content": text});
-      final response = await widget.dio.post(url, data: widget.messagesVal_);
-      if (response.statusCode == 200) {
-        content = response.data["choices"][0]["message"]["content"];
-        var token = response.data["usage"]["total_tokens"].toString();
-        widget.tokenSpent_ = "$token/4096";
-        tokenSpent_ = "$token/4096";
-      } else {
-        content = response.data;
-      }
+      //final response = await widget.dio.post(url, data: widget.messagesVal_);
+      content = '';
+      final response = await widget.dio.post(
+        url,
+        data: widget.messagesVal_,
+        options: Options(responseType: ResponseType.stream),
+      );
+      // if (response.statusCode == 200) {
+      //   content = response.data["choices"][0]["message"]["content"];
+      //   var token = response.data["usage"]["total_tokens"].toString();
+      //   widget.tokenSpent_ = "$token/4096";
+      //   tokenSpent_ = "$token/4096";
+      // } else {
+      //   content = response.data;
+      // }
+      response.data?.stream.listen((event) {
+        //print(utf8.decode(event));
+        print("test");
+        content += utf8.decode(event);
+        widget.onReceivedMsg(id, tokenSpent_, append);
+        append = true;
+      });
     } catch (e) {
       content = e.toString();
+      widget.onReceivedMsg(id, tokenSpent_, false);
     }
-
-    widget.onReceivedMsg(id, tokenSpent_);
+    //widget.onReceivedMsg(id, tokenSpent_);
   }
 }
 
