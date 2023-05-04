@@ -85,20 +85,22 @@ class InitPageState extends State<InitPage> {
         },
       ),
       title: RichText(
-          text: TextSpan(children: [
-        TextSpan(
-            text: getChatPageTitle(),
-            style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
-        TextSpan(
-            text: selectedChatPageId == chatPage.id ? chatPage.tokenSpent_ : "",
-            style: const TextStyle(
-                fontSize: 9.5,
-                //fontStyle: FontStyle.normal,
-                color: Colors.grey))
-      ])),
+          text: TextSpan(
+              text: getChatPageTitle(),
+              style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+              children: [
+            TextSpan(
+                text: selectedChatPageId == chatPage.id
+                    ? chatPage.tokenSpent_
+                    : "",
+                style: const TextStyle(
+                    fontSize: 9.5,
+                    //fontStyle: FontStyle.normal,
+                    color: Colors.grey))
+          ])),
       actions: <Widget>[
         IconButton(
             tooltip: "About",
