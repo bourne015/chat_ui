@@ -126,39 +126,31 @@ class InitPageState extends State<InitPage> {
           //   ),
           //   child: Text('side bar title'),
           // ),
-          Column(
-            children: [
-              Container(
-                  decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 224, 221, 221),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(15),
-                        topRight: Radius.circular(15),
-                        bottomLeft: Radius.circular(15),
-                        bottomRight: Radius.circular(15),
-                      )),
-                  margin: const EdgeInsets.only(
-                      left: 15, right: 15, top: 10, bottom: 10),
-                  child: ListTile(
-                    leading: const Icon(Icons.add),
-                    minLeadingWidth: 0,
-                    title: const Text('New Chat'),
-                    onTap: () {
-                      //setState(() {
-                      final newId = maxChatPageId + 1;
-                      maxChatPageId++;
-                      final newPage = ChatPage(
-                          id: newId.toString(),
-                          onTokenChanged: handleTokenChange,
-                          onReceivedMsg: handleReceiveMsg);
-                      chatPages.add(newPage);
-                      updateChatPage(newPage.id);
-                      //});
-                      Navigator.pop(context);
-                    },
-                  )),
-            ],
-          ),
+          Container(
+              margin: const EdgeInsets.all(10.0),
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  final newId = maxChatPageId + 1;
+                  maxChatPageId++;
+                  final newPage = ChatPage(
+                      id: newId.toString(),
+                      onTokenChanged: handleTokenChange,
+                      onReceivedMsg: handleReceiveMsg);
+                  chatPages.add(newPage);
+                  updateChatPage(newPage.id);
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('New Chat'),
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(
+                      const Size(double.infinity, 60)),
+                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                  //padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15))),
+                ),
+              )),
           Expanded(
             child: ListView.builder(
               shrinkWrap: false,
