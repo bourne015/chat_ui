@@ -79,7 +79,7 @@ class ChatBody extends State<ChatPage> {
             child: Container(
           decoration: const BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage("assets/images/chatgpt_green.png"))),
+                  image: AssetImage("assets/images/chatgpt_red.png"))),
           child: ListView.builder(
             key: UniqueKey(),
             padding: const EdgeInsets.all(8.0),

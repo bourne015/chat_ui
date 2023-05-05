@@ -56,6 +56,7 @@ flutter:
   assets:
     - assets/images/chatgpt.png
     - assets/images/chatgpt_green.png
+    - assets/images/chatgpt_red.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
