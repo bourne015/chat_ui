@@ -39,9 +39,10 @@ class ChatPage extends StatefulWidget {
         ));
   }
 
-  void appMsg(val) {
-    messagesVal_[messagesVal_.length - 1]["content"] = val;
-    messages_[messages_.length - 1] = Container(
+  void appMsg(content) {
+    var val = {"role": "assistant", "content": content};
+    messagesVal_[messagesVal_.length - 1]["content"] = content;
+    messages_[0] = Container(
       alignment: Alignment.centerRight,
       child: MessageBox(val: val),
     );
@@ -76,7 +77,7 @@ class ChatBody extends State<ChatPage> {
             page.appMsg(content);
           }
           //page.setToken(tokenSpent_);
-          widget.onTokenChanged(id);
+          //widget.onTokenChanged(id);
           break;
         }
       }
@@ -175,8 +176,6 @@ class ChatBody extends State<ChatPage> {
       //   content = response.data;
       // }
       response.data?.stream.listen((event) {
-        //print(utf8.decode(event));
-        print("test");
         content += utf8.decode(event);
         widget.onReceivedMsg(id, tokenSpent_, append);
         append = true;
@@ -209,9 +208,8 @@ class MessageBox extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10.0),
               decoration: BoxDecoration(
-                  color: val['role'] == "user"
-                      ? Colors.lightGreenAccent[700]
-                      : Colors.white,
+                  color:
+                      val['role'] == "user" ? Colors.purple[400] : Colors.white,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(6),
                     topRight: Radius.circular(6),
