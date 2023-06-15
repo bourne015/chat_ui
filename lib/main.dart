@@ -19,6 +19,7 @@ class _AppState extends State<ChatApp> {
     return MaterialApp(
       title: 'Chat Demo',
       theme: ThemeData(
+        fontFamily: "GalleryIcons",
         primarySwatch: Colors.blueGrey,
       ),
       home: const InitPage(),
