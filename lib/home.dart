@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'chat.dart';
+import 'utils.dart';
 
 class InitPage extends StatefulWidget {
   const InitPage({super.key});
@@ -15,6 +17,7 @@ class InitPageState extends State<InitPage> {
   late String selectedChatPageId = '0';
   late int maxChatPageId = 0;
   late String tokenTitle = '';
+  GPT _selectedSegment = GPT.v35;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +60,10 @@ class InitPageState extends State<InitPage> {
     // setState(() {
     //   tokenTitle = token;
     // });
+  }
+
+  void resetModel() {
+    ChatBody.currentState()?.setGptModel(_selectedSegment);
   }
 
   void updateChatPage(String id) {
@@ -102,6 +109,30 @@ class InitPageState extends State<InitPage> {
                     color: Colors.grey))
           ])),
       actions: <Widget>[
+        CupertinoSlidingSegmentedControl<GPT>(
+          thumbColor: const Color.fromARGB(255, 71, 86, 171),
+          backgroundColor: const Color.fromARGB(255, 100, 120, 128),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
+          // This represents a currently selected segmented control.
+          groupValue: _selectedSegment,
+          // Callback that sets the selected segmented control.
+          onValueChanged: (GPT? value) {
+            setState(() {
+              _selectedSegment = value!;
+              resetModel();
+            });
+          },
+          children: const <GPT, Widget>{
+            GPT.v35: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              child: Text('GPT-3.5'),
+            ),
+            GPT.v40: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              child: Text('GPT-4.0'),
+            ),
+          },
+        ),
         IconButton(
             tooltip: "About",
             onPressed: () {
