@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 
+import 'utils.dart';
+
 class ChatPage extends StatefulWidget {
   ChatPage(
       {Key? key,
@@ -57,6 +59,7 @@ class ChatBody extends State<ChatPage> {
   String url = "http://";
   String content = '';
   String tokenSpent_ = '';
+  String selectModel = 'gpt35';
 
   static currentState() {
     var state = ChatBody.chatKey.currentContext?.findAncestorStateOfType();
@@ -82,6 +85,14 @@ class ChatBody extends State<ChatPage> {
         }
       }
     });
+  }
+
+  void setGptModel(GPT modelVersion) {
+    if (modelVersion == GPT.v40) {
+      selectModel = 'gpt40';
+    } else {
+      selectModel = 'gpt35';
+    }
   }
 
   @override
@@ -164,7 +175,7 @@ class ChatBody extends State<ChatPage> {
       content = '';
       final response = await widget.dio.post(
         url,
-        data: widget.messagesVal_,
+        data: {"model": selectModel, "question": widget.messagesVal_},
         options: Options(responseType: ResponseType.stream),
       );
       // if (response.statusCode == 200) {
