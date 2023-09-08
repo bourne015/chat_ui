@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
-import "home.dart";
+import 'home.dart';
+import 'routes.dart' as routes;
 
 void main() {
   runApp(const ChatApp());
 }
 
 class ChatApp extends StatefulWidget {
+  static const String homeRoute = routes.homeRoute;
+
   const ChatApp({super.key});
 
   @override
@@ -19,10 +22,13 @@ class _AppState extends State<ChatApp> {
     return MaterialApp(
       title: 'Chat Demo',
       theme: ThemeData(
-        fontFamily: "GalleryIcons",
+        fontFamily: 'GalleryIcons',
         primarySwatch: Colors.blueGrey,
       ),
-      home: const InitPage(),
+      initialRoute: ChatApp.homeRoute,
+      routes: {
+        ChatApp.homeRoute: (context) => const InitPage(),
+      },
     );
   }
 }
