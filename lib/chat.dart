@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'dart:convert';
+import 'dart:async';
+import 'dart:html';
 
 import 'utils.dart';
 
@@ -19,7 +20,6 @@ class ChatPage extends StatefulWidget {
   List<Widget> messages_ = [];
   List<Map> messagesVal_ = [];
   var myController = TextEditingController();
-  final dio = Dio();
   String tokenSpent_ = '';
 
   void clearMessages() {
@@ -160,6 +160,54 @@ class ChatBody extends State<ChatPage> {
     );
   }
 
+  Stream<String> connect(String path, String method,
+      {Map<String, dynamic>? headers, String? body}) {
+    int progress = 0;
+    //const asciiEncoder = AsciiEncoder();
+    final httpRequest = HttpRequest();
+    final streamController = StreamController<String>();
+    httpRequest.open(method, path);
+    headers?.forEach((key, value) {
+      httpRequest.setRequestHeader(key, value);
+    });
+    //httpRequest.onProgress.listen((event) {
+    httpRequest.addEventListener('progress', (event) {
+      final data = httpRequest.responseText!.substring(progress);
+
+      var lines = data.split("\r\n\r");
+      for (var line in lines) {
+        line = line.trimLeft();
+        for (var vline in line.split('\n')) {
+          if (vline.startsWith("data:")) {
+            vline = vline.substring(5).replaceFirst(' ', '');
+            streamController.add(vline);
+          }
+        }
+      }
+
+      progress += data.length;
+    });
+    httpRequest.addEventListener('loadstart', (event) {
+      debugPrint("event start");
+    });
+    httpRequest.addEventListener('load', (event) {
+      debugPrint("event load");
+    });
+    httpRequest.addEventListener('loadend', (event) {
+      httpRequest.abort();
+      streamController.close();
+      debugPrint("event end");
+    });
+    httpRequest.addEventListener('error', (event) {
+      streamController.addError(
+        httpRequest.responseText ?? httpRequest.status ?? 'err',
+      );
+      debugPrint("event error");
+    });
+    httpRequest.send(body);
+    return streamController.stream;
+  }
+
   void _submitText(String text, String id) async {
     //String? content;
     bool append = false;
@@ -170,26 +218,30 @@ class ChatBody extends State<ChatPage> {
     });
 
     try {
-      //final response = await dio.post(url, data: {"content": text});
-      //final response = await widget.dio.post(url, data: widget.messagesVal_);
       content = '';
-      final response = await widget.dio.post(
-        url,
-        data: {"model": selectModel, "question": widget.messagesVal_},
-        options: Options(responseType: ResponseType.stream),
-      );
-      // if (response.statusCode == 200) {
-      //   content = response.data["choices"][0]["message"]["content"];
+
       //   var token = response.data["usage"]["total_tokens"].toString();
       //   widget.tokenSpent_ = "$token/4096";
       //   tokenSpent_ = "$token/4096";
-      // } else {
-      //   content = response.data;
-      // }
-      response.data?.stream.listen((event) {
-        content += utf8.decode(event);
+
+      var chatData = {"model": selectModel, "question": widget.messagesVal_};
+      final stream = connect(
+        url,
+        "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream'
+        },
+        body: jsonEncode(chatData),
+      );
+      stream.listen((data) {
+        content += data;
         widget.onReceivedMsg(id, tokenSpent_, append);
         append = true;
+      }, onError: (e) {
+        debugPrint('SSE error: $e');
+      }, onDone: () {
+        debugPrint('SSE complete');
       });
     } catch (e) {
       content = e.toString();
