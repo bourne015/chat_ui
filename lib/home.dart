@@ -37,6 +37,7 @@ class InitPageState extends State<InitPage> {
       ChatPage(
           id: '0',
           onTokenChanged: handleTokenChange,
+          onTitleSummary: handleTitleSummary,
           onReceivedMsg: handleReceiveMsg)
     ];
     chatPage = chatPages.first;
@@ -55,8 +56,12 @@ class InitPageState extends State<InitPage> {
     }
   }
 
-  void handleReceiveMsg(id, token, append) {
-    ChatBody.currentState()?.handleMessages(chatPages, id, append);
+  void handleTitleSummary(id) {
+    ChatBody.currentState()?.handleTitleSummary(chatPages, id);
+  }
+
+  void handleReceiveMsg(id, token, append, data) {
+    ChatBody.currentState()?.handleMessages(chatPages, id, append, data);
     // setState(() {
     //   tokenTitle = token;
     // });
@@ -74,8 +79,13 @@ class InitPageState extends State<InitPage> {
     });
   }
 
-  String getChatPageTitle() {
-    return "Chat $selectedChatPageId";
+  String getChatPageTitle(id) {
+    final tpage = chatPages.singleWhere((page) => page.id == id);
+    if (tpage.titleSummerized) {
+      return tpage.title;
+    } else {
+      return "Chat $id";
+    }
   }
 
   PreferredSizeWidget buildAppBar(BuildContext context) {
@@ -93,7 +103,7 @@ class InitPageState extends State<InitPage> {
       ),
       title: RichText(
           text: TextSpan(
-              text: getChatPageTitle(),
+              text: "Chat", //getChatPageTitle(),
               style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -168,6 +178,7 @@ class InitPageState extends State<InitPage> {
                   final newPage = ChatPage(
                       id: newId.toString(),
                       onTokenChanged: handleTokenChange,
+                      onTitleSummary: handleTitleSummary,
                       onReceivedMsg: handleReceiveMsg);
                   chatPages.add(newPage);
                   updateChatPage(newPage.id);
@@ -194,7 +205,9 @@ class InitPageState extends State<InitPage> {
                   leading: const Icon(Icons.chat),
                   minLeadingWidth: 0,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 30),
-                  title: Text("Chat ${page.id}"),
+                  title: Text(getChatPageTitle(page.id),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1), //Text("Chat ${page.id}"),
                   onTap: () {
                     updateChatPage(page.id);
                     Navigator.pop(context);
@@ -204,6 +217,7 @@ class InitPageState extends State<InitPage> {
                       ? Row(mainAxisSize: MainAxisSize.min, children: [
                           IconButton(
                             icon: const Icon(Icons.close),
+                            iconSize: 20,
                             onPressed: () {
                               var removeId = page.id;
                               chatPages.removeAt(index);
