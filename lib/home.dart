@@ -201,35 +201,40 @@ class InitPageState extends State<InitPage> {
               itemCount: chatPages.length,
               itemBuilder: (context, index) {
                 final page = chatPages[index];
-                return ListTile(
-                  leading: const Icon(Icons.chat),
-                  minLeadingWidth: 0,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 30),
-                  title: Text(getChatPageTitle(page.id),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1), //Text("Chat ${page.id}"),
-                  onTap: () {
-                    updateChatPage(page.id);
-                    Navigator.pop(context);
-                  },
-                  //always keep chat 0
-                  trailing: index > 0
-                      ? Row(mainAxisSize: MainAxisSize.min, children: [
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            iconSize: 20,
-                            onPressed: () {
-                              var removeId = page.id;
-                              chatPages.removeAt(index);
-                              if (removeId == selectedChatPageId) {
-                                updateChatPage(chatPages[0].id);
-                              }
-                              setState(() {});
-                            },
-                          ),
-                        ])
-                      : null,
-                );
+                return Container(
+                    margin: const EdgeInsets.fromLTRB(8.0, 0, 10, 0),
+                    child: ListTile(
+                      selectedTileColor: Colors.grey[300],
+                      selected: page.id == selectedChatPageId,
+                      leading: const Icon(Icons.chat),
+                      minLeadingWidth: 0,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 30),
+                      title: Text(getChatPageTitle(page.id),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1), //Text("Chat ${page.id}"),
+                      onTap: () {
+                        updateChatPage(page.id);
+                        Navigator.pop(context);
+                      },
+                      //always keep chat 0
+                      trailing: index > 0
+                          ? Row(mainAxisSize: MainAxisSize.min, children: [
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                iconSize: 20,
+                                onPressed: () {
+                                  var removeId = page.id;
+                                  chatPages.removeAt(index);
+                                  if (removeId == selectedChatPageId) {
+                                    updateChatPage(chatPages[0].id);
+                                  }
+                                  setState(() {});
+                                },
+                              ),
+                            ])
+                          : null,
+                    ));
               },
             ),
           ),
