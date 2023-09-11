@@ -18,16 +18,37 @@ class InitPageState extends State<InitPage> {
   late int maxChatPageId = 0;
   late String tokenTitle = '';
   GPT _selectedSegment = GPT.v35;
+  bool _isDrawerOpen = true;
 
   @override
   Widget build(BuildContext context) {
     chatPage = chatPages.singleWhere((page) => page.id == selectedChatPageId);
+    if (isDisplayDesktop(context)) {
+      return buildDesktop(context);
+    }
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: buildAppBar(context),
       drawer: buildDrawer(context),
       body: chatPage,
     );
+  }
+
+  Widget buildDesktop(BuildContext context) {
+    return Row(children: <Widget>[
+      if (_isDrawerOpen) buildDrawer(context),
+      const VerticalDivider(width: 1),
+      Expanded(
+          child: Scaffold(
+        backgroundColor: Colors.grey[200],
+        appBar: buildAppBar(context),
+        body: Row(
+          children: <Widget>[
+            Expanded(flex: 8, child: chatPage),
+          ],
+        ),
+      ))
+    ]);
   }
 
   @override
@@ -38,6 +59,7 @@ class InitPageState extends State<InitPage> {
           id: '0',
           onTokenChanged: handleTokenChange,
           onTitleSummary: handleTitleSummary,
+          doneTitleSummary: handledoneTitleSummary,
           onReceivedMsg: handleReceiveMsg)
     ];
     chatPage = chatPages.first;
@@ -58,6 +80,10 @@ class InitPageState extends State<InitPage> {
 
   void handleTitleSummary(id) {
     ChatBody.currentState()?.handleTitleSummary(chatPages, id);
+  }
+
+  void handledoneTitleSummary() {
+    setState(() {});
   }
 
   void handleReceiveMsg(id, token, append, data) {
@@ -93,10 +119,16 @@ class InitPageState extends State<InitPage> {
       leading: Builder(
         builder: (BuildContext context) {
           return IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+            icon: isDisplayDesktop(context)
+                ? Icon(_isDrawerOpen ? Icons.menu_open : Icons.chevron_right)
+                : const Icon(Icons.menu),
+            onPressed: () => setState(() {
+              if (isDisplayDesktop(context)) {
+                _isDrawerOpen = !_isDrawerOpen;
+              } else {
+                Scaffold.of(context).openDrawer();
+              }
+            }),
             tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
           );
         },
@@ -173,16 +205,16 @@ class InitPageState extends State<InitPage> {
               margin: const EdgeInsets.all(10.0),
               child: OutlinedButton.icon(
                 onPressed: () {
-                  final newId = maxChatPageId + 1;
-                  maxChatPageId++;
+                  final newId = ++maxChatPageId;
                   final newPage = ChatPage(
                       id: newId.toString(),
                       onTokenChanged: handleTokenChange,
                       onTitleSummary: handleTitleSummary,
+                      doneTitleSummary: handledoneTitleSummary,
                       onReceivedMsg: handleReceiveMsg);
                   chatPages.add(newPage);
                   updateChatPage(newPage.id);
-                  Navigator.pop(context);
+                  if (!isDisplayDesktop(context)) Navigator.pop(context);
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('New Chat'),
@@ -209,13 +241,13 @@ class InitPageState extends State<InitPage> {
                       leading: const Icon(Icons.chat),
                       minLeadingWidth: 0,
                       contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 30),
+                          const EdgeInsets.symmetric(horizontal: 10),
                       title: Text(getChatPageTitle(page.id),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1), //Text("Chat ${page.id}"),
                       onTap: () {
                         updateChatPage(page.id);
-                        Navigator.pop(context);
+                        if (!isDisplayDesktop(context)) Navigator.pop(context);
                       },
                       //always keep chat 0
                       trailing: index > 0
@@ -255,10 +287,10 @@ class InitPageState extends State<InitPage> {
                   setState(() {
                     chatPages[int.parse(selectedChatPageId)].clearMessages();
                     chatPages[int.parse(selectedChatPageId)].setToken("");
-                    updateChatPage(selectedChatPageId);
+                    //updateChatPage(selectedChatPageId);
                     refreshChat();
                   });
-                  Navigator.pop(context);
+                  if (!isDisplayDesktop(context)) Navigator.pop(context);
                 },
               ),
               ListTile(
@@ -266,7 +298,9 @@ class InitPageState extends State<InitPage> {
                 minLeadingWidth: 0,
                 title: const Text('Log out'),
                 onTap: () {
-                  Navigator.pop(context); // hide sidebar
+                  if (!isDisplayDesktop(context)) {
+                    Navigator.pop(context); // hide sidebar
+                  }
                 },
               )
             ],
