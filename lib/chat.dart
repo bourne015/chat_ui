@@ -12,12 +12,14 @@ class ChatPage extends StatefulWidget {
       required this.id,
       required this.onTokenChanged,
       required this.onTitleSummary,
+      required this.doneTitleSummary,
       required this.onReceivedMsg})
       : super(key: key);
 
   final String id;
   final Function onReceivedMsg;
   final Function onTitleSummary;
+  final Function doneTitleSummary;
   final Function onTokenChanged;
 
   List<Widget> messages_ = [];
@@ -31,6 +33,7 @@ class ChatPage extends StatefulWidget {
   void clearMessages() {
     messages_.clear();
     messagesVal_.clear();
+    titleSummerized = false;
   }
 
   void setToken(val) {
@@ -188,6 +191,7 @@ class ChatBody extends State<ChatPage> {
     final response = await widget.dio.post(url1Chat, data: chatData1);
     page.title = response.data["choices"][0]["message"]["content"];
     page.titleSummerized = true;
+    widget.doneTitleSummary();
   }
 
   void _submitText(String text, String id) async {
