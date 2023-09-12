@@ -16,7 +16,7 @@ class ChatPage extends StatefulWidget {
       required this.onReceivedMsg})
       : super(key: key);
 
-  final String id;
+  final int id;
   final Function onReceivedMsg;
   final Function onTitleSummary;
   final Function doneTitleSummary;
@@ -85,27 +85,24 @@ class ChatBody extends State<ChatPage> {
   }
 
   void handleTitleSummary(chatPages, id) {
-    for (var page in chatPages) {
-      if (page.id == id && page.titleSummerized == false) {
-        titleSummery(
-            page.messagesVal_[page.messagesVal_.length - 1]["content"], page);
-      }
+    if (chatPages.containsKey(id) && !chatPages[id].titleSummerized) {
+      titleSummery(
+          chatPages[id].messagesVal_[chatPages[id].messagesVal_.length - 1]
+              ["content"],
+          chatPages[id]);
     }
   }
 
   void handleMessages(chatPages, id, append, data) {
     setState(() {
-      for (var page in chatPages) {
-        if (page.id == id) {
-          if (append == false) {
-            page.addMsg({"role": "assistant", "content": data});
-          } else {
-            page.appMsg(data);
-          }
-          //page.setToken(tokenSpent_);
-          //widget.onTokenChanged(id);
-          break;
+      if (chatPages.containsKey(id)) {
+        if (append == false) {
+          chatPages[id].addMsg({"role": "assistant", "content": data});
+        } else {
+          chatPages[id].appMsg(data);
         }
+        //page.setToken(tokenSpent_);
+        //widget.onTokenChanged(id);
       }
     });
   }
@@ -194,7 +191,7 @@ class ChatBody extends State<ChatPage> {
     widget.doneTitleSummary();
   }
 
-  void _submitText(String text, String id) async {
+  void _submitText(String text, int id) async {
     //String? content;
     bool append = false;
     widget.myController.clear();
@@ -205,7 +202,6 @@ class ChatBody extends State<ChatPage> {
 
     try {
       content = '';
-
       //   var token = response.data["usage"]["total_tokens"].toString();
       //   widget.tokenSpent_ = "$token/4096";
       //   tokenSpent_ = "$token/4096";
@@ -315,7 +311,9 @@ class ChatSSE {
     });
     httpRequest.addEventListener('loadend', (event) {
       httpRequest.abort();
-      streamController.close();
+      if (!streamController.isClosed) {
+        streamController.close();
+      }
       debugPrint("event end");
     });
     httpRequest.addEventListener('error', (event) {

@@ -17,3 +17,5 @@ bool isDisplayFoldable(BuildContext context) {
     return hinge.bounds.size.aspectRatio < 1;
   }
 }
+
+const double drawerWidth = 265;
