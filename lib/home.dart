@@ -12,9 +12,9 @@ class InitPage extends StatefulWidget {
 }
 
 class InitPageState extends State<InitPage> {
-  List<ChatPage> chatPages = [];
+  Map<int, ChatPage> chatPages = {};
   late ChatPage chatPage;
-  late String selectedChatPageId = '0';
+  late int selectedChatPageId = 0;
   late int maxChatPageId = 0;
   late String tokenTitle = '';
   GPT _selectedSegment = GPT.v35;
@@ -22,7 +22,7 @@ class InitPageState extends State<InitPage> {
 
   @override
   Widget build(BuildContext context) {
-    chatPage = chatPages.singleWhere((page) => page.id == selectedChatPageId);
+    chatPage = chatPages[selectedChatPageId]!;
     if (isDisplayDesktop(context)) {
       return buildDesktop(context);
     }
@@ -54,15 +54,13 @@ class InitPageState extends State<InitPage> {
   @override
   void initState() {
     super.initState();
-    chatPages = [
-      ChatPage(
-          id: '0',
-          onTokenChanged: handleTokenChange,
-          onTitleSummary: handleTitleSummary,
-          doneTitleSummary: handledoneTitleSummary,
-          onReceivedMsg: handleReceiveMsg)
-    ];
-    chatPage = chatPages.first;
+    chatPages[0] = ChatPage(
+        id: 0,
+        onTokenChanged: handleTokenChange,
+        onTitleSummary: handleTitleSummary,
+        doneTitleSummary: handledoneTitleSummary,
+        onReceivedMsg: handleReceiveMsg);
+    chatPage = chatPages[0]!;
     selectedChatPageId = chatPage.id;
   }
 
@@ -97,16 +95,16 @@ class InitPageState extends State<InitPage> {
     ChatBody.currentState()?.setGptModel(_selectedSegment);
   }
 
-  void updateChatPage(String id) {
+  void updateChatPage(int id) {
     setState(() {
-      chatPage = chatPages.singleWhere((page) => page.id == id);
+      chatPage = chatPages[id]!;
       selectedChatPageId = id;
       //tokenTitle = chatPage.tokenSpent_;
     });
   }
 
   String getChatPageTitle(id) {
-    final tpage = chatPages.singleWhere((page) => page.id == id);
+    final tpage = chatPages[id]!;
     if (tpage.titleSummerized) {
       return tpage.title;
     } else {
@@ -189,7 +187,9 @@ class InitPageState extends State<InitPage> {
   }
 
   Widget buildDrawer(BuildContext context) {
+    var chatIDs = chatPages.keys.toList();
     return Drawer(
+      width: drawerWidth,
       child: Column(
         //padding: EdgeInsets.zero,
         children: <Widget>[
@@ -207,12 +207,12 @@ class InitPageState extends State<InitPage> {
                 onPressed: () {
                   final newId = ++maxChatPageId;
                   final newPage = ChatPage(
-                      id: newId.toString(),
+                      id: newId,
                       onTokenChanged: handleTokenChange,
                       onTitleSummary: handleTitleSummary,
                       doneTitleSummary: handledoneTitleSummary,
                       onReceivedMsg: handleReceiveMsg);
-                  chatPages.add(newPage);
+                  chatPages[newId] = newPage;
                   updateChatPage(newPage.id);
                   if (!isDisplayDesktop(context)) Navigator.pop(context);
                 },
@@ -230,9 +230,9 @@ class InitPageState extends State<InitPage> {
           Expanded(
             child: ListView.builder(
               shrinkWrap: false,
-              itemCount: chatPages.length,
+              itemCount: chatIDs.length,
               itemBuilder: (context, index) {
-                final page = chatPages[index];
+                final page = chatPages[chatIDs[index]]!;
                 return Container(
                     margin: const EdgeInsets.fromLTRB(8.0, 0, 10, 0),
                     child: ListTile(
@@ -250,16 +250,16 @@ class InitPageState extends State<InitPage> {
                         if (!isDisplayDesktop(context)) Navigator.pop(context);
                       },
                       //always keep chat 0
-                      trailing: index > 0
+                      trailing: chatIDs[index] > 0
                           ? Row(mainAxisSize: MainAxisSize.min, children: [
                               IconButton(
                                 icon: const Icon(Icons.close),
                                 iconSize: 20,
                                 onPressed: () {
                                   var removeId = page.id;
-                                  chatPages.removeAt(index);
+                                  chatPages.remove(removeId);
                                   if (removeId == selectedChatPageId) {
-                                    updateChatPage(chatPages[0].id);
+                                    updateChatPage(chatPages[0]!.id);
                                   }
                                   setState(() {});
                                 },
@@ -285,8 +285,8 @@ class InitPageState extends State<InitPage> {
                 title: const Text('Clear Conversations'),
                 onTap: () {
                   setState(() {
-                    chatPages[int.parse(selectedChatPageId)].clearMessages();
-                    chatPages[int.parse(selectedChatPageId)].setToken("");
+                    chatPages[selectedChatPageId]!.clearMessages();
+                    chatPages[selectedChatPageId]!.setToken("");
                     //updateChatPage(selectedChatPageId);
                     refreshChat();
                   });
