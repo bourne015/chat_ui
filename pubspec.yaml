@@ -62,10 +62,15 @@ flutter:
     - assets/images/chatgpt_red.png
 
   fonts:
-    - family: GalleryIcons
+    - family: NotoSans
       fonts:
-        - asset: fonts/GalleryIcons.ttf
-
+        - asset: fonts/NotoSans-Regular.ttf
+    - family: notosanssc
+      fonts:
+        - asset: fonts/NotoSansSC-Regular.ttf
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

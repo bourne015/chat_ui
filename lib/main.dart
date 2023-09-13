@@ -22,7 +22,7 @@ class _AppState extends State<ChatApp> {
     return MaterialApp(
       title: 'Chat Demo',
       theme: ThemeData(
-        fontFamily: 'GalleryIcons',
+        fontFamily: 'notosanssc',
         primarySwatch: Colors.blueGrey,
       ),
       initialRoute: ChatApp.homeRoute,
