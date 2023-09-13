@@ -67,7 +67,7 @@ flutter:
         - asset: fonts/NotoSans-Regular.ttf
     - family: notosanssc
       fonts:
-        - asset: fonts/NotoSansSC-Regular.ttf
+        - asset: fonts/NotoSansSC-Regular.woff2
     - family: Roboto
       fonts:
         - asset: fonts/Roboto-Regular.ttf
