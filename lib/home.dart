@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'chat.dart';
 import 'utils.dart';
+import 'constants.dart';
 
 class InitPage extends StatefulWidget {
   const InitPage({super.key});
@@ -17,7 +18,7 @@ class InitPageState extends State<InitPage> {
   late int selectedChatPageId = 0;
   late int maxChatPageId = 0;
   late String tokenTitle = '';
-  GPT _selectedSegment = GPT.v35;
+  GPT _selectedSegment = defaultModel;
   bool _isDrawerOpen = true;
 
   @override
@@ -27,7 +28,7 @@ class InitPageState extends State<InitPage> {
       return buildDesktop(context);
     }
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: AppColors.chatPageBackground,
       appBar: buildAppBar(context),
       drawer: buildDrawer(context),
       body: chatPage,
@@ -40,7 +41,7 @@ class InitPageState extends State<InitPage> {
       const VerticalDivider(width: 1),
       Expanded(
           child: Scaffold(
-        backgroundColor: Colors.grey[200],
+        backgroundColor: AppColors.chatPageBackground,
         appBar: buildAppBar(context),
         body: Row(
           children: <Widget>[
@@ -137,7 +138,7 @@ class InitPageState extends State<InitPage> {
               style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                  color: AppColors.chatPageTitle),
               children: [
             TextSpan(
                 text: selectedChatPageId == chatPage.id
@@ -146,12 +147,12 @@ class InitPageState extends State<InitPage> {
                 style: const TextStyle(
                     fontSize: 9.5,
                     //fontStyle: FontStyle.normal,
-                    color: Colors.grey))
+                    color: AppColors.chatPageTitleToken))
           ])),
       actions: <Widget>[
         CupertinoSlidingSegmentedControl<GPT>(
-          thumbColor: const Color.fromARGB(255, 71, 86, 171),
-          backgroundColor: const Color.fromARGB(255, 100, 120, 128),
+          thumbColor: AppColors.modelSelected,
+          backgroundColor: AppColors.modelSelectorBackground,
           padding: const EdgeInsets.symmetric(horizontal: 0),
           // This represents a currently selected segmented control.
           groupValue: _selectedSegment,
@@ -236,7 +237,7 @@ class InitPageState extends State<InitPage> {
                 return Container(
                     margin: const EdgeInsets.fromLTRB(8.0, 0, 10, 0),
                     child: ListTile(
-                      selectedTileColor: Colors.grey[300],
+                      selectedTileColor: AppColors.drawerTabSelected,
                       selected: page.id == selectedChatPageId,
                       leading: const Icon(Icons.chat),
                       minLeadingWidth: 0,
@@ -275,7 +276,7 @@ class InitPageState extends State<InitPage> {
             thickness: 1,
             indent: 10,
             endIndent: 10,
-            color: Color.fromARGB(255, 186, 182, 182),
+            color: AppColors.drawerDivider,
           ),
           Column(
             children: [

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'home.dart';
 import 'routes.dart' as routes;
+import 'constants.dart';
 
 void main() {
   runApp(const ChatApp());
@@ -23,7 +24,7 @@ class _AppState extends State<ChatApp> {
       title: 'Chat Demo',
       theme: ThemeData(
         fontFamily: 'notosanssc',
-        primarySwatch: Colors.blueGrey,
+        primarySwatch: AppColors.titleBar,
       ),
       initialRoute: ChatApp.homeRoute,
       routes: {

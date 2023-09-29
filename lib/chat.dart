@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'dart:async';
-import 'dart:html';
 import 'package:dio/dio.dart';
 
 import 'utils.dart';
+import 'constants.dart';
 
 class ChatPage extends StatefulWidget {
   ChatPage(
@@ -68,8 +67,6 @@ class ChatPage extends StatefulWidget {
 
 class ChatBody extends State<ChatPage> {
   static GlobalKey chatKey = GlobalKey();
-  String urlSSE = "http://127.0.0.1:8001/v1/stream/chat";
-  String url1Chat = "http://127.0.0.1:8001/v1/chat";
   String content = '';
   String tokenSpent_ = '';
   String selectModel = 'gpt35';
@@ -135,7 +132,7 @@ class ChatBody extends State<ChatPage> {
         )),
         Container(
           decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: AppColors.inputBoxBackground,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(15),
                 topRight: Radius.circular(15),
@@ -151,7 +148,7 @@ class ChatBody extends State<ChatPage> {
                 child: TextField(
                   decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.blue[50],
+                      fillColor: AppColors.inputTextField,
                       border: const OutlineInputBorder(
                           borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(15),
@@ -230,99 +227,5 @@ class ChatBody extends State<ChatPage> {
       widget.onReceivedMsg(id, tokenSpent_, false, e.toString());
     }
     //widget.onReceivedMsg(id, tokenSpent_);
-  }
-}
-
-class MessageBox extends StatelessWidget {
-  //final String role;
-  //final String content
-  final Map val;
-
-  const MessageBox({super.key, required this.val});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Icon(val['role'] == "user" ? Icons.person : Icons.perm_identity,
-              size: 32),
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                  color:
-                      val['role'] == "user" ? Colors.purple[400] : Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(6),
-                    topRight: Radius.circular(6),
-                    bottomLeft: Radius.circular(6),
-                    bottomRight: Radius.circular(6),
-                  )),
-              child: SelectableText(val['content'],
-                  //overflow: TextOverflow.ellipsis,
-                  //showCursor: false,
-                  maxLines: null,
-                  style: const TextStyle(fontSize: 18.0, color: Colors.black)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ChatSSE {
-  Stream<String> connect(String path, String method,
-      {Map<String, dynamic>? headers, String? body}) {
-    int progress = 0;
-    //const asciiEncoder = AsciiEncoder();
-    final httpRequest = HttpRequest();
-    final streamController = StreamController<String>();
-    httpRequest.open(method, path);
-    headers?.forEach((key, value) {
-      httpRequest.setRequestHeader(key, value);
-    });
-    //httpRequest.onProgress.listen((event) {
-    httpRequest.addEventListener('progress', (event) {
-      final data = httpRequest.responseText!.substring(progress);
-
-      var lines = data.split("\r\n\r");
-      for (var line in lines) {
-        line = line.trimLeft();
-        for (var vline in line.split('\n')) {
-          if (vline.startsWith("data:")) {
-            vline = vline.substring(5).replaceFirst(' ', '');
-            streamController.add(vline);
-          }
-        }
-      }
-
-      progress += data.length;
-    });
-    httpRequest.addEventListener('loadstart', (event) {
-      final data = httpRequest.responseText!.substring(0);
-      debugPrint("event start:$data");
-    });
-    httpRequest.addEventListener('load', (event) {
-      debugPrint("event load");
-    });
-    httpRequest.addEventListener('loadend', (event) {
-      httpRequest.abort();
-      if (!streamController.isClosed) {
-        streamController.close();
-      }
-      debugPrint("event end");
-    });
-    httpRequest.addEventListener('error', (event) {
-      streamController.addError(
-        httpRequest.responseText ?? httpRequest.status ?? 'err',
-      );
-      debugPrint("event error");
-    });
-    httpRequest.send(body);
-    return streamController.stream;
   }
 }
