@@ -31,7 +31,7 @@ class MyAppBarState extends State<MyAppBar> {
       CupertinoSlidingSegmentedControl<String>(
         thumbColor: AppColors.modelSelected,
         backgroundColor: AppColors.modelSelectorBackground,
-        padding: const EdgeInsets.symmetric(horizontal: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         // This represents a currently selected segmented control.
         groupValue: pages.modelVersion,
         // Callback that sets the selected segmented control.
@@ -40,11 +40,11 @@ class MyAppBarState extends State<MyAppBar> {
         },
         children: const <String, Widget>{
           ModelVersion.gptv35: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5),
+            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
             child: Text('GPT-3.5'),
           ),
           ModelVersion.gptv40: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5),
+            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
             child: Text('GPT-4.0'),
           ),
         },

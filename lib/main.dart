@@ -25,7 +25,7 @@ class _AppState extends State<ChatApp> {
   Widget build(BuildContext context) {
     final pages = Pages();
     var newId = pages.assignNewPageID;
-    pages.addPage(newId, Chat(chatId: newId, title: "chat 0"));
+    pages.addPage(newId, Chat(chatId: newId, title: "Chat 0"));
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => pages),

@@ -39,7 +39,7 @@ class ChatDrawerState extends State<ChatDrawer> {
               if (pages.currentPage?.onGenerating == false) {
                 pages.clearMsg(pages.currentPageID);
               }
-              pages.currentPage?.title = "chat ${pages.currentPage?.id}";
+              pages.currentPage?.title = "Chat ${pages.currentPage?.id}";
               if (!isDisplayDesktop(context)) Navigator.pop(context);
             },
           ),
@@ -65,7 +65,7 @@ class ChatDrawerState extends State<ChatDrawer> {
         child: OutlinedButton.icon(
           onPressed: () {
             var newId = pages.assignNewPageID;
-            pages.addPage(newId, Chat(chatId: newId, title: "chat $newId"));
+            pages.addPage(newId, Chat(chatId: newId, title: "Chat $newId"));
             pages.currentPageID = newId;
             if (!isDisplayDesktop(context)) Navigator.pop(context);
           },
@@ -73,11 +73,11 @@ class ChatDrawerState extends State<ChatDrawer> {
           label: const Text('New Chat'),
           style: ButtonStyle(
             minimumSize:
-                MaterialStateProperty.all(const Size(double.infinity, 60)),
+                MaterialStateProperty.all(const Size(double.infinity, 55)),
             padding: MaterialStateProperty.all(EdgeInsets.zero),
             //padding: EdgeInsets.symmetric(horizontal: 20.0),
             shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15))),
+                borderRadius: BorderRadius.circular(10))),
           ),
         ));
   }
@@ -102,7 +102,7 @@ class ChatDrawerState extends State<ChatDrawer> {
         child: ListTile(
           selectedTileColor: AppColors.drawerTabSelected,
           selected: pages.currentPageID == page.id,
-          leading: const Icon(Icons.chat),
+          leading: const Icon(Icons.chat_bubble_outline, size: 18),
           minLeadingWidth: 0,
           contentPadding: const EdgeInsets.symmetric(horizontal: 10),
           title: Text(page.title, overflow: TextOverflow.ellipsis, maxLines: 1),

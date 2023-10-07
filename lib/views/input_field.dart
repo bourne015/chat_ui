@@ -145,7 +145,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
         pages.getPage(hanglePageID).onGenerating = false;
       }, onDone: () {
         debugPrint('SSE complete');
-        if (pages.getPage(hanglePageID).title == "chat $hanglePageID") {
+        if (pages.getPage(hanglePageID).title == "Chat $hanglePageID") {
           titleSummery(pages, hanglePageID);
         }
         pages.getPage(hanglePageID).onGenerating = false;

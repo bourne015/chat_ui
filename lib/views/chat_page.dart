@@ -17,21 +17,17 @@ class ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     Pages pages = Provider.of<Pages>(context);
-    final msgBox = pages.getMessageBox(pages.currentPageID);
+    final msgBoxes = pages.getMessageBox(pages.currentPageID);
     return Column(children: [
       Flexible(
-          child: Container(
-        decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("assets/images/chatgpt_red.png"))),
         child: ListView.builder(
           key: UniqueKey(),
           padding: const EdgeInsets.all(8.0),
           reverse: true,
-          itemBuilder: (context, index) => msgBox?[index],
-          itemCount: msgBox?.length,
+          itemBuilder: (context, index) => msgBoxes?[index],
+          itemCount: msgBoxes?.length,
         ),
-      )),
+      ),
       const ChatInputField(),
     ]);
   }
