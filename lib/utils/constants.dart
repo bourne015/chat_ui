@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+const String appTitle = 'Chat Demo';
+
 class AppColors {
   static const titleBar = Colors.blueGrey;
   static const chatPageTitle = Colors.white;
@@ -18,11 +20,22 @@ class AppColors {
   static const msgText = Colors.black;
 }
 
-enum GPT { v35, v40 }
+class MessageRole {
+  static const String system = "system";
+  static const String user = "user";
+  static const String assistant = "assistant";
+}
 
-const GPT defaultModel = GPT.v35;
+class ModelVersion {
+  static const String gptv35 = "GPT-3.5";
+  static const String gptv40 = "GPT-4.0";
+}
 
-const double drawerWidth = 265;
+const double drawerWidth = 260;
 
-const String urlSSE = "https://fantao.life:8001/v1/stream/chat";
-const String url1Chat = "https://fantao.life:8001/v1/chat";
+const String urlSSE = "http://127.0.0.1:8001/v1/stream/chat";
+const String url1Chat = "http://127.0.0.1:8001/v1/chat";
+
+const String aboutText = "A Demo for ChatGPT-3.5, the token is limited, "
+    "Please refresh the page if reached max tokens"
+    "or don't need question context";

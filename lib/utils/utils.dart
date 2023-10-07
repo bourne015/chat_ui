@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:html';
 
-import 'package:mychat/constants.dart';
-
 bool isDisplayDesktop(BuildContext context) =>
     !isDisplayFoldable(context) &&
     getWindowType(context) >= AdaptiveWindowType.medium;
@@ -18,49 +16,6 @@ bool isDisplayFoldable(BuildContext context) {
   } else {
     // Vertical
     return hinge.bounds.size.aspectRatio < 1;
-  }
-}
-
-class MessageBox extends StatelessWidget {
-  //final String role;
-  //final String content
-  final Map val;
-
-  const MessageBox({super.key, required this.val});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Icon(val['role'] == "user" ? Icons.person : Icons.perm_identity,
-              size: 32),
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                  color: val['role'] == "user"
-                      ? AppColors.userMsgBox
-                      : AppColors.aiMsgBox,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(6),
-                    topRight: Radius.circular(6),
-                    bottomLeft: Radius.circular(6),
-                    bottomRight: Radius.circular(6),
-                  )),
-              child: SelectableText(val['content'],
-                  //overflow: TextOverflow.ellipsis,
-                  //showCursor: false,
-                  maxLines: null,
-                  style: const TextStyle(
-                      fontSize: 18.0, color: AppColors.msgText)),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

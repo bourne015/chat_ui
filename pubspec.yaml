@@ -39,6 +39,7 @@ dependencies:
   html: ^0.15.4
   adaptive_breakpoints: ^0.1.1
   dual_screen: ^1.0.4
+  provider: ^6.0.0
 
 dev_dependencies:
   flutter_test:
