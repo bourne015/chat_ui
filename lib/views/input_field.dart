@@ -138,7 +138,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
         } else {
           pages.appendMessage(hanglePageID, data);
         }
-        pages.currentPage?.onGenerating = true;
+        pages.getPage(hanglePageID).onGenerating = true;
         append = true;
       }, onError: (e) {
         debugPrint('SSE error: $e');
