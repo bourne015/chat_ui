@@ -4,8 +4,9 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 
 import '../models/pages.dart';
-import '../utils/constants.dart';
+import '../models/chat.dart';
 import '../models/message.dart';
+import '../utils/constants.dart';
 import '../utils/utils.dart';
 
 class ChatInputField extends StatefulWidget {
@@ -74,48 +75,65 @@ class _ChatInputFieldState extends State<ChatInputField> {
     Pages pages = Provider.of<Pages>(context);
     return IconButton(
       icon: const Icon(Icons.send),
-      color: (_hasInputContent && !pages.currentPage!.onGenerating)
+      color: (_hasInputContent &&
+              (pages.displayInitPage ||
+                  (pages.currentPageID >= 0 &&
+                      !pages.currentPage!.onGenerating)))
           ? Colors.blue
           : Colors.grey,
-      onPressed: (_hasInputContent && !pages.currentPage!.onGenerating)
-          ? () => {
-                _submitText(
-                  pages,
-                  pages.currentPageID,
-                  _controller.text,
-                ),
-                _hasInputContent = false
+      onPressed: (_hasInputContent &&
+              (pages.displayInitPage ||
+                  (pages.currentPageID >= 0 &&
+                      !pages.currentPage!.onGenerating)))
+          ? () {
+              int handlePageID;
+              if (pages.currentPageID == -1) {
+                handlePageID = pages.assignNewPageID;
+                pages.currentPageID = handlePageID;
+                pages.addPage(handlePageID,
+                    Chat(chatId: handlePageID, title: "Chat $handlePageID"));
+                pages.displayInitPage = false;
+                pages.currentPage?.modelVersion = pages.defaultModelVersion;
+              } else {
+                handlePageID = pages.currentPageID;
               }
-          : null,
+              _submitText(
+                pages,
+                handlePageID,
+                _controller.text,
+              );
+              _hasInputContent = false;
+            }
+          : () {},
     );
   }
 
-  void titleSummery(Pages pages, int hanglePageID) async {
-    String q = pages.getMessages(hanglePageID)![1].content;
+  void titleSummery(Pages pages, int handlePageID) async {
+    String q = pages.getMessages(handlePageID)![1].content;
     var chatData1 = {
-      "model": pages.modelVersion,
+      "model": pages.defaultModelVersion,
       "question": "为这段话写一个5个字左右的标题:$q"
     };
     final response = await dio.post(url1Chat, data: chatData1);
     var title = response.data["choices"][0]["message"]["content"];
-    pages.setPageTitle(hanglePageID, title);
+    pages.setPageTitle(handlePageID, title);
   }
 
-  void _submitText(Pages pages, int hanglePageID, String text) async {
+  void _submitText(Pages pages, int handlePageID, String text) async {
     bool append = false;
     _controller.clear();
     Message msgQ = Message(
         id: '0',
-        pageID: hanglePageID,
+        pageID: handlePageID,
         role: MessageRole.user,
         content: text,
         timestamp: DateTime.now());
-    pages.addMessage(hanglePageID, msgQ);
+    pages.addMessage(handlePageID, msgQ);
 
     try {
       var chatData = {
-        "model": pages.modelVersion,
-        "question": pages.getPage(hanglePageID).msgsToMap()
+        "model": pages.defaultModelVersion,
+        "question": pages.getPage(handlePageID).msgsToMap()
       };
       final stream = chatServer.connect(
         urlSSE,
@@ -130,29 +148,29 @@ class _ChatInputFieldState extends State<ChatInputField> {
         if (append == false) {
           Message msgA = Message(
               id: '1',
-              pageID: hanglePageID,
+              pageID: handlePageID,
               role: MessageRole.assistant,
               content: data,
               timestamp: DateTime.now());
-          pages.addMessage(hanglePageID, msgA);
+          pages.addMessage(handlePageID, msgA);
         } else {
-          pages.appendMessage(hanglePageID, data);
+          pages.appendMessage(handlePageID, data);
         }
-        pages.getPage(hanglePageID).onGenerating = true;
+        pages.getPage(handlePageID).onGenerating = true;
         append = true;
       }, onError: (e) {
         debugPrint('SSE error: $e');
-        pages.getPage(hanglePageID).onGenerating = false;
+        pages.getPage(handlePageID).onGenerating = false;
       }, onDone: () {
         debugPrint('SSE complete');
-        if (pages.getPage(hanglePageID).title == "Chat $hanglePageID") {
-          titleSummery(pages, hanglePageID);
+        if (pages.getPage(handlePageID).title == "Chat $handlePageID") {
+          titleSummery(pages, handlePageID);
         }
-        pages.getPage(hanglePageID).onGenerating = false;
+        pages.getPage(handlePageID).onGenerating = false;
       });
     } catch (e) {
       debugPrint("error: $e");
-      pages.getPage(hanglePageID).onGenerating = false;
+      pages.getPage(handlePageID).onGenerating = false;
     }
   }
 }

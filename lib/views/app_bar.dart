@@ -22,7 +22,7 @@ class MyAppBarState extends State<MyAppBar> {
     return AppBar(
       leading: appbarLeading(context, pages),
       title: appbarTitle(context),
-      actions: appbarActions(context, pages),
+      //actions: appbarActions(context, pages),
     );
   }
 
@@ -30,13 +30,13 @@ class MyAppBarState extends State<MyAppBar> {
     return [
       CupertinoSlidingSegmentedControl<String>(
         thumbColor: AppColors.modelSelected,
-        backgroundColor: AppColors.modelSelectorBackground,
+        backgroundColor: AppColors.modelSelectorBackground!,
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         // This represents a currently selected segmented control.
-        groupValue: pages.modelVersion,
+        groupValue: pages.defaultModelVersion,
         // Callback that sets the selected segmented control.
         onValueChanged: (String? value) {
-          pages.modelVersion = value;
+          pages.defaultModelVersion = value;
         },
         children: const <String, Widget>{
           ModelVersion.gptv35: Padding(
@@ -60,14 +60,16 @@ class MyAppBarState extends State<MyAppBar> {
   }
 
   Widget appbarTitle(BuildContext context) {
+    Pages pages = Provider.of<Pages>(context);
     return RichText(
-        text: const TextSpan(
-            text: "Chat",
-            style: TextStyle(
-                fontSize: 20,
+        text: TextSpan(
+            text:
+                pages.currentPageID > -1 ? pages.currentPage!.modelVersion : "",
+            style: const TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.chatPageTitle),
-            children: [
+            children: const [
           TextSpan(
               text: "",
               style: TextStyle(

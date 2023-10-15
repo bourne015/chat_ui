@@ -24,8 +24,6 @@ class _AppState extends State<ChatApp> {
   @override
   Widget build(BuildContext context) {
     final pages = Pages();
-    var newId = pages.assignNewPageID;
-    pages.addPage(newId, Chat(chatId: newId, title: "Chat 0"));
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => pages),
@@ -34,7 +32,7 @@ class _AppState extends State<ChatApp> {
           title: appTitle,
           theme: ThemeData(
             fontFamily: 'notosanssc',
-            primarySwatch: AppColors.titleBar,
+            primarySwatch: AppColors.theme,
           ),
           initialRoute: ChatApp.homeRoute,
           routes: {

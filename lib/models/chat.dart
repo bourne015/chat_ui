@@ -12,6 +12,7 @@ class Chat {
   List<Map> msg = [];
 
   String title;
+  String modelVersion = '';
   int tokenSpent = 0;
   bool onGenerating = false;
 

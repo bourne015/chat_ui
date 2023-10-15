@@ -19,12 +19,13 @@ class ChatDrawerState extends State<ChatDrawer> {
     Pages pages = Provider.of<Pages>(context);
     return Drawer(
       width: drawerWidth,
+      backgroundColor: Colors.white,
       child: Column(
         //padding: EdgeInsets.zero,
-        children: <Widget>[
+        children: [
           newchatButton(context),
           chatPageTabList(context),
-          const Divider(
+          Divider(
             height: 20,
             thickness: 1,
             indent: 10,
@@ -60,26 +61,56 @@ class ChatDrawerState extends State<ChatDrawer> {
 
   Widget newchatButton(BuildContext context) {
     Pages pages = Provider.of<Pages>(context);
-    return Container(
-        margin: const EdgeInsets.all(10.0),
-        child: OutlinedButton.icon(
-          onPressed: () {
-            var newId = pages.assignNewPageID;
-            pages.addPage(newId, Chat(chatId: newId, title: "Chat $newId"));
-            pages.currentPageID = newId;
-            if (!isDisplayDesktop(context)) Navigator.pop(context);
-          },
-          icon: const Icon(Icons.add),
-          label: const Text('New Chat'),
-          style: ButtonStyle(
-            minimumSize:
-                MaterialStateProperty.all(const Size(double.infinity, 55)),
-            padding: MaterialStateProperty.all(EdgeInsets.zero),
-            //padding: EdgeInsets.symmetric(horizontal: 20.0),
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10))),
-          ),
-        ));
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+      Expanded(
+          flex: 4,
+          child: Container(
+              margin: const EdgeInsets.all(8.0),
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  // var newId = pages.assignNewPageID;
+                  // pages.addPage(
+                  //     newId, Chat(chatId: newId, title: "Chat $newId"));
+                  // pages.currentPageID = newId;
+                  pages.displayInitPage = true;
+                  pages.currentPageID = -1;
+                  if (!isDisplayDesktop(context)) Navigator.pop(context);
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('New Chat'),
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(
+                      const Size(double.infinity, 52)),
+                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                  //padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8))),
+                ),
+              ))),
+      if (isDisplayDesktop(context))
+        Expanded(
+            flex: 1,
+            child: Container(
+                margin:
+                    const EdgeInsets.only(left: 0, right: 7, top: 7, bottom: 7),
+                child: OutlinedButton(
+                  onPressed: () {
+                    if (isDisplayDesktop(context)) {
+                      pages.isDrawerOpen = !pages.isDrawerOpen;
+                    } else {
+                      Scaffold.of(context).openDrawer();
+                    }
+                  },
+                  style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all(
+                        const Size(double.infinity, 52)),
+                    padding: MaterialStateProperty.all(EdgeInsets.zero),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8))),
+                  ),
+                  child: const Icon(Icons.amp_stories_outlined),
+                ))),
+    ]);
   }
 
   Widget delChattabButton(BuildContext context, Pages pages, int removeID) {
@@ -89,7 +120,8 @@ class ChatDrawerState extends State<ChatDrawer> {
         iconSize: 20,
         onPressed: () {
           pages.delPage(removeID);
-          pages.currentPageID = 0;
+          pages.currentPageID = -1;
+          pages.displayInitPage = true;
         },
       ),
     ]);
@@ -108,6 +140,7 @@ class ChatDrawerState extends State<ChatDrawer> {
           title: Text(page.title, overflow: TextOverflow.ellipsis, maxLines: 1),
           onTap: () {
             pages.currentPageID = page.id;
+            pages.displayInitPage = false;
             if (!isDisplayDesktop(context)) Navigator.pop(context);
           },
           //always keep chat 0

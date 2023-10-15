@@ -7,6 +7,7 @@ import './utils/constants.dart';
 import './views/app_bar.dart';
 import './views/drawer.dart';
 import '../models/pages.dart';
+import './views/init_page.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -18,6 +19,7 @@ class MainLayout extends StatefulWidget {
 class MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
+    Pages pages = Provider.of<Pages>(context);
     if (isDisplayDesktop(context)) {
       return buildDesktop(context);
     } else {
@@ -25,7 +27,7 @@ class MainLayoutState extends State<MainLayout> {
         backgroundColor: AppColors.chatPageBackground,
         appBar: const MyAppBar(),
         drawer: const ChatDrawer(),
-        body: const ChatPage(),
+        body: pages.displayInitPage ? buildInitPage(context) : const ChatPage(),
       );
     }
   }
@@ -38,13 +40,49 @@ class MainLayoutState extends State<MainLayout> {
       Expanded(
           child: Scaffold(
         backgroundColor: AppColors.chatPageBackground,
-        appBar: const MyAppBar(),
-        body: const Row(
-          children: <Widget>[
-            Expanded(flex: 8, child: ChatPage()),
-          ],
-        ),
+        //appBar: const MyAppBar(),
+        body: pages.displayInitPage
+            ? buildInitPage(context)
+            : buildChatPage(context),
       ))
     ]);
+  }
+
+  Widget buildChatPage(BuildContext context) {
+    Pages pages = Provider.of<Pages>(context);
+    return NestedScrollView(
+      floatHeaderSlivers: true,
+      scrollDirection: Axis.vertical,
+
+      //physics: ClampingScrollPhysics,
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+        return <Widget>[
+          SliverAppBar(
+            title: Text(
+              pages.currentPage!.modelVersion,
+              style: const TextStyle(fontSize: 16, color: AppColors.appBarText),
+            ),
+            pinned: false,
+            floating: true,
+            snap: true,
+            //stretch: true,
+            backgroundColor: AppColors.appBarBackground,
+          ),
+        ];
+      },
+      body: const Row(
+        children: <Widget>[
+          Expanded(flex: 8, child: ChatPage()),
+        ],
+      ),
+    );
+  }
+
+  Widget buildInitPage(BuildContext context) {
+    return const Row(
+      children: <Widget>[
+        Expanded(flex: 8, child: InitPage()),
+      ],
+    );
   }
 }

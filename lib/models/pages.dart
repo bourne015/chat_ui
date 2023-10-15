@@ -8,10 +8,17 @@ import '../utils/constants.dart';
 class Pages with ChangeNotifier {
   final Map<int, Chat> _pages = {};
   final List<int> _pagesID = [];
-  int _currentPageID = 0;
+  int _currentPageID = -1;
   int _maxPageID = 0;
-  String _modelVersion = ModelVersion.gptv35;
+  String _defaultModelVersion = ModelVersion.gptv35;
   bool _isDrawerOpen = true;
+  bool _displayInitPage = true;
+
+  bool get displayInitPage => _displayInitPage;
+  set displayInitPage(bool val) {
+    _displayInitPage = val;
+    notifyListeners();
+  }
 
   set currentPageID(int cid) {
     _currentPageID = cid;
@@ -19,13 +26,20 @@ class Pages with ChangeNotifier {
   }
 
   int get currentPageID => _currentPageID;
-  Chat? get currentPage => _pages[_currentPageID];
+  Chat? get currentPage {
+    if (currentPageID >= 0) {
+      return _pages[_currentPageID]!;
+    } else {
+      return null;
+    }
+  }
+
   int get pagesLen => _pages.length;
 
-  String get modelVersion => _modelVersion;
+  String get defaultModelVersion => _defaultModelVersion;
 
-  set modelVersion(String? v) {
-    _modelVersion = v!;
+  set defaultModelVersion(String? v) {
+    _defaultModelVersion = v!;
     notifyListeners();
   }
 

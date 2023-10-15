@@ -1,33 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:mychat/views/init_page.dart';
 import 'package:provider/provider.dart';
 
 import '../models/pages.dart';
-import './input_field.dart';
 import '../utils/utils.dart';
 
-class ChatPage extends StatefulWidget {
-  const ChatPage({
-    Key? key,
-  }) : super(key: key);
+class ChatDrawerButton extends StatelessWidget {
+  const ChatDrawerButton({super.key});
 
-  @override
-  State createState() => ChatPageState();
-}
-
-class ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
-    Pages pages = Provider.of<Pages>(context);
-    return Column(children: [
-      if (isDisplayDesktop(context) && !pages.isDrawerOpen)
-        drawerButton(context),
-      messageList(context),
-      const ChatInputField(),
-    ]);
-  }
-
-  Widget drawerButton(BuildContext context) {
     Pages pages = Provider.of<Pages>(context);
     return Row(children: [
       Container(
@@ -49,19 +30,5 @@ class ChatPageState extends State<ChatPage> {
             child: const Icon(Icons.amp_stories_outlined),
           ))
     ]);
-  }
-
-  Widget messageList(BuildContext context) {
-    Pages pages = Provider.of<Pages>(context);
-    final msgBoxes = pages.getMessageBox(pages.currentPageID);
-    return Flexible(
-      child: ListView.builder(
-        key: UniqueKey(),
-        padding: const EdgeInsets.all(8.0),
-        reverse: true,
-        itemBuilder: (context, index) => msgBoxes?[index],
-        itemCount: msgBoxes?.length,
-      ),
-    );
   }
 }
