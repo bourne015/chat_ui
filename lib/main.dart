@@ -5,7 +5,6 @@ import './models/pages.dart';
 import 'main_layout.dart';
 import 'routes.dart' as routes;
 import 'utils/constants.dart';
-import './models/chat.dart';
 
 void main() {
   runApp(const ChatApp());

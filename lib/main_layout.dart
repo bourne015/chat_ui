@@ -6,7 +6,7 @@ import './utils/utils.dart';
 import './utils/constants.dart';
 import './views/app_bar.dart';
 import './views/drawer.dart';
-import '../models/pages.dart';
+import './models/pages.dart';
 import './views/init_page.dart';
 
 class MainLayout extends StatefulWidget {

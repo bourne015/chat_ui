@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mychat/views/init_page.dart';
 import 'package:provider/provider.dart';
 
 import '../models/pages.dart';
