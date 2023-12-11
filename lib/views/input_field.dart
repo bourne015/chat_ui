@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/pages.dart';
 import '../models/chat.dart';
@@ -21,22 +22,26 @@ class _ChatInputFieldState extends State<ChatInputField> {
   final ChatSSE chatServer = ChatSSE();
   final _controller = TextEditingController();
   bool _hasInputContent = false;
+  XFile? _imageFile;
+  String? _imageBase64;
 
   @override
   Widget build(BuildContext context) {
+    Pages pages = Provider.of<Pages>(context);
     return Container(
       decoration: BoxDecoration(
           color: AppColors.inputBoxBackground,
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(15),
-            topRight: Radius.circular(15),
-            bottomLeft: Radius.circular(15),
-            bottomRight: Radius.circular(15),
+            topLeft: Radius.circular(7),
+            topRight: Radius.circular(7),
+            bottomLeft: Radius.circular(7),
+            bottomRight: Radius.circular(7),
           )),
-      margin: const EdgeInsets.only(left: 25, right: 25, top: 5, bottom: 15),
-      padding: const EdgeInsets.only(left: 15, right: 5, top: 1, bottom: 1),
+      margin: const EdgeInsets.only(left: 50, right: 50, top: 5, bottom: 15),
+      padding: const EdgeInsets.only(left: 7, right: 1, top: 1, bottom: 1),
       child: Row(
         children: [
+          if (pages.defaultModelVersion == 'GPT-4.0') pickButton(context),
           inputField(context),
           sendButton(context),
         ],
@@ -46,42 +51,77 @@ class _ChatInputFieldState extends State<ChatInputField> {
 
   Widget inputField(BuildContext context) {
     return Expanded(
-      child: TextField(
-        onChanged: (value) {
-          setState(() {
-            _hasInputContent = value.isNotEmpty;
-          });
-        },
-        decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.inputTextField,
-            border: const OutlineInputBorder(
-                borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(15),
-              topRight: Radius.circular(15),
-              bottomLeft: Radius.circular(15),
-              bottomRight: Radius.circular(15),
-            )),
-            hintText: 'Send a message'),
-        minLines: 1,
-        maxLines: 10,
-        textInputAction: TextInputAction.newline,
-        controller: _controller,
+        child: Stack(alignment: Alignment.topLeft, children: <Widget>[
+      Column(children: [
+        _imageFile != null ? imageField(context) : Container(),
+        const SizedBox(width: 8),
+        TextField(
+          onChanged: (value) {
+            setState(() {
+              _hasInputContent = value.isNotEmpty;
+            });
+          },
+          decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.inputBoxBackground,
+              border: InputBorder.none,
+              hintText: 'Send a message'),
+          minLines: 1,
+          maxLines: 10,
+          textInputAction: TextInputAction.newline,
+          controller: _controller,
+        ),
+      ]),
+    ]));
+  }
+
+  Widget imageField(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          color: AppColors.inputBoxBackground,
+          borderRadius: const BorderRadius.all(Radius.circular(15))),
+      margin: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(1),
+      child: Row(
+        children: [
+          Image.network(_imageFile!.path,
+              height: 60, width: 60, fit: BoxFit.cover),
+          IconButton(
+            icon: const Icon(
+              Icons.close,
+              size: 12,
+            ),
+            onPressed: () {
+              setState(() {
+                _imageFile = null;
+              });
+            },
+          ),
+        ],
       ),
     );
+  }
+
+  Widget pickButton(BuildContext context) {
+    return IconButton(
+        icon: const Icon(
+          Icons.image_rounded,
+          size: 20,
+        ),
+        onPressed: _pickImage);
   }
 
   Widget sendButton(BuildContext context) {
     Pages pages = Provider.of<Pages>(context);
     return IconButton(
       icon: const Icon(Icons.send),
-      color: (_hasInputContent &&
+      color: ((_imageFile != null || _hasInputContent) &&
               (pages.displayInitPage ||
                   (pages.currentPageID >= 0 &&
                       !pages.currentPage!.onGenerating)))
           ? Colors.blue
           : Colors.grey,
-      onPressed: (_hasInputContent &&
+      onPressed: ((_imageFile != null || _hasInputContent) &&
               (pages.displayInitPage ||
                   (pages.currentPageID >= 0 &&
                       !pages.currentPage!.onGenerating)))
@@ -103,9 +143,24 @@ class _ChatInputFieldState extends State<ChatInputField> {
                 _controller.text,
               );
               _hasInputContent = false;
+              _imageFile = null;
             }
           : () {},
     );
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile != null) {
+        _imageFile = pickedFile;
+      } else {
+        _imageFile = null;
+      }
+    });
+    List<int> imageBytes = await _imageFile!.readAsBytes();
+    _imageBase64 = base64Encode(imageBytes);
   }
 
   void titleSummery(Pages pages, int handlePageID) async {
@@ -127,6 +182,8 @@ class _ChatInputFieldState extends State<ChatInputField> {
         pageID: handlePageID,
         role: MessageRole.user,
         content: text,
+        file: _imageFile,
+        fileBase64: _imageBase64,
         timestamp: DateTime.now());
     pages.addMessage(handlePageID, msgQ);
 

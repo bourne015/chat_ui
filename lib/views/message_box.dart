@@ -31,12 +31,19 @@ class MessageBox extends StatelessWidget {
                     bottomLeft: Radius.circular(6),
                     bottomRight: Radius.circular(6),
                   )),
-              child: SelectableText(val['content'],
-                  //overflow: TextOverflow.ellipsis,
-                  //showCursor: false,
-                  maxLines: null,
-                  style: const TextStyle(
-                      fontSize: 18.0, color: AppColors.msgText)),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (val["file"] != null)
+                      Image.network(val["file"]!.path,
+                          height: 300, width: 300, fit: BoxFit.cover),
+                    SelectableText(val['content'],
+                        //overflow: TextOverflow.ellipsis,
+                        //showCursor: false,
+                        maxLines: null,
+                        style: const TextStyle(
+                            fontSize: 18.0, color: AppColors.msgText))
+                  ]),
             ),
           ),
         ],

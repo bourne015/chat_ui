@@ -28,8 +28,11 @@ class Chat {
         0,
         Container(
           alignment: Alignment.centerRight,
-          child:
-              MessageBox(val: {"role": newMsg.role, "content": newMsg.content}),
+          child: MessageBox(val: {
+            "role": newMsg.role,
+            "content": newMsg.content,
+            "file": newMsg.file
+          }),
         ));
   }
 
