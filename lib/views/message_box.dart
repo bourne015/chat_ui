@@ -37,17 +37,45 @@ class MessageBox extends StatelessWidget {
                     if (val["file"] != null)
                       Image.network(val["file"]!.path,
                           height: 300, width: 300, fit: BoxFit.cover),
-                    SelectableText(val['content'],
-                        //overflow: TextOverflow.ellipsis,
-                        //showCursor: false,
-                        maxLines: null,
-                        style: const TextStyle(
-                            fontSize: 18.0, color: AppColors.msgText))
+                    displayContent(context)
                   ]),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget displayContent(BuildContext context) {
+    if (val["type"] == MsgType.image) {
+      return Image.network(
+        val['content'],
+        height: 512,
+        width: 512,
+        loadingBuilder: (BuildContext context, Widget child,
+            ImageChunkEvent? loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              color: AppColors.appBarBackground,
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
+        },
+        errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return const Text('image load error');
+        },
+      );
+    } else {
+      return SelectableText(val['content'],
+          //overflow: TextOverflow.ellipsis,
+          //showCursor: false,
+          maxLines: null,
+          style: const TextStyle(fontSize: 18.0, color: AppColors.msgText));
+    }
   }
 }

@@ -1,9 +1,11 @@
 import 'package:image_picker/image_picker.dart';
+import '../utils/constants.dart';
 
 class Message {
   final String id;
   final int pageID;
   final String role;
+  MsgType type;
   String content;
   XFile? file;
   String? fileBase64;
@@ -13,6 +15,7 @@ class Message {
     required this.id,
     required this.pageID,
     required this.role,
+    this.type = MsgType.text,
     required this.content,
     this.file,
     this.fileBase64,

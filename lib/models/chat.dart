@@ -12,7 +12,7 @@ class Chat {
   List<Map> msg = [];
 
   String title;
-  String modelVersion = '';
+  String _modelVersion = '';
   int tokenSpent = 0;
   bool onGenerating = false;
 
@@ -22,6 +22,13 @@ class Chat {
   })  : id = chatId,
         title = title!;
 
+  String get modelVersion => _modelVersion;
+
+  set modelVersion(String? v) {
+    _modelVersion = v!;
+    //notifyListeners();
+  }
+
   void addMessage(Message newMsg) {
     messages.add(newMsg);
     messageBox.insert(
@@ -30,6 +37,7 @@ class Chat {
           alignment: Alignment.centerRight,
           child: MessageBox(val: {
             "role": newMsg.role,
+            "type": newMsg.type,
             "content": newMsg.content,
             "file": newMsg.file
           }),

@@ -30,14 +30,19 @@ class MessageRole {
 }
 
 class ModelVersion {
-  static const String gptv35 = "GPT-3.5";
-  static const String gptv40 = "GPT-4.0";
+  static const String gptv35 = "gpt-3.5-turbo-1106";
+  static const String gptv40 = "gpt-4-1106-preview";
+  static const String gptv40Vision = "gpt-4-vision-preview";
+  static const String gptv40Dall = "dall-e-3";
 }
+
+enum MsgType { text, image }
 
 const double drawerWidth = 260;
 
-const String urlSSE = "http://127.0.0.1:8001/v1/stream/chat";
-const String url1Chat = "http://127.0.0.1:8001/v1/chat";
+const String sseChatUrl = "http://127.0.0.1:8001/v1/stream/chat";
+const String chatUrl = "http://127.0.0.1:8001/v1/chat";
+const String imageUrl = "http://127.0.0.1:8001/v1/image";
 
 const String aboutText = "A Demo for ChatGPT-3.5, the token is limited, "
     "Please refresh the page if reached max tokens"

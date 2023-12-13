@@ -41,7 +41,12 @@ class _ChatInputFieldState extends State<ChatInputField> {
       padding: const EdgeInsets.only(left: 7, right: 1, top: 1, bottom: 1),
       child: Row(
         children: [
-          if (pages.defaultModelVersion == 'GPT-4.0') pickButton(context),
+          if ((!pages.displayInitPage &&
+                  pages.currentPage?.modelVersion ==
+                      ModelVersion.gptv40Vision) ||
+              (pages.displayInitPage &&
+                  pages.defaultModelVersion == ModelVersion.gptv40Vision))
+            pickButton(context),
           inputField(context),
           sendButton(context),
         ],
@@ -50,12 +55,27 @@ class _ChatInputFieldState extends State<ChatInputField> {
   }
 
   Widget inputField(BuildContext context) {
+    Pages pages = Provider.of<Pages>(context);
+    String hintText = "Send a message";
+    if (pages.displayInitPage) {
+      if (pages.defaultModelVersion == ModelVersion.gptv40Vision) {
+        hintText = "pick image and input questions";
+      } else if (pages.defaultModelVersion == ModelVersion.gptv40Dall) {
+        hintText = "describe the image";
+      }
+    } else {
+      if (pages.currentPage!.modelVersion == ModelVersion.gptv40Vision) {
+        hintText = "pick image and input questions";
+      } else if (pages.currentPage!.modelVersion == ModelVersion.gptv40Dall) {
+        hintText = "describe the image";
+      }
+    }
     return Expanded(
         child: Stack(alignment: Alignment.topLeft, children: <Widget>[
       Column(children: [
         _imageFile != null ? imageField(context) : Container(),
         const SizedBox(width: 8),
-        TextField(
+        TextFormField(
           onChanged: (value) {
             setState(() {
               _hasInputContent = value.isNotEmpty;
@@ -65,7 +85,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
               filled: true,
               fillColor: AppColors.inputBoxBackground,
               border: InputBorder.none,
-              hintText: 'Send a message'),
+              hintText: hintText),
           minLines: 1,
           maxLines: 10,
           textInputAction: TextInputAction.newline,
@@ -164,13 +184,18 @@ class _ChatInputFieldState extends State<ChatInputField> {
   }
 
   void titleSummery(Pages pages, int handlePageID) async {
-    String q = pages.getMessages(handlePageID)![1].content;
+    String q;
+    if (pages.getPage(handlePageID).modelVersion == ModelVersion.gptv40Dall) {
+      q = pages.getMessages(handlePageID)!.first.content;
+    } else {
+      q = pages.getMessages(handlePageID)![1].content;
+    }
     var chatData1 = {
-      "model": pages.defaultModelVersion,
+      "model": ModelVersion.gptv35,
       "question": "为这段话写一个5个字左右的标题:$q"
     };
-    final response = await dio.post(url1Chat, data: chatData1);
-    var title = response.data["choices"][0]["message"]["content"];
+    final response = await dio.post(chatUrl, data: chatData1);
+    var title = response.data;
     pages.setPageTitle(handlePageID, title);
   }
 
@@ -181,53 +206,75 @@ class _ChatInputFieldState extends State<ChatInputField> {
         id: '0',
         pageID: handlePageID,
         role: MessageRole.user,
+        type: MsgType.text,
         content: text,
         file: _imageFile,
         fileBase64: _imageBase64,
         timestamp: DateTime.now());
     pages.addMessage(handlePageID, msgQ);
 
-    try {
-      var chatData = {
-        "model": pages.defaultModelVersion,
-        "question": pages.getPage(handlePageID).msgsToMap()
-      };
-      final stream = chatServer.connect(
-        urlSSE,
-        "POST",
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream'
-        },
-        body: jsonEncode(chatData),
-      );
-      stream.listen((data) {
-        if (append == false) {
-          Message msgA = Message(
-              id: '1',
-              pageID: handlePageID,
-              role: MessageRole.assistant,
-              content: data,
-              timestamp: DateTime.now());
-          pages.addMessage(handlePageID, msgA);
-        } else {
-          pages.appendMessage(handlePageID, data);
-        }
-        pages.getPage(handlePageID).onGenerating = true;
-        append = true;
-      }, onError: (e) {
-        debugPrint('SSE error: $e');
-        pages.getPage(handlePageID).onGenerating = false;
-      }, onDone: () {
-        debugPrint('SSE complete');
-        if (pages.getPage(handlePageID).title == "Chat $handlePageID") {
-          titleSummery(pages, handlePageID);
-        }
-        pages.getPage(handlePageID).onGenerating = false;
-      });
-    } catch (e) {
-      debugPrint("error: $e");
+    if (pages.defaultModelVersion == ModelVersion.gptv40Dall) {
+      String q = pages.getMessages(handlePageID)!.last.content;
+      var chatData1 = {"model": ModelVersion.gptv40Dall, "question": q};
+      pages.getPage(handlePageID).onGenerating = true;
+      final response = await dio.post(imageUrl, data: chatData1);
       pages.getPage(handlePageID).onGenerating = false;
+      if (pages.getPage(handlePageID).title == "Chat $handlePageID") {
+        titleSummery(pages, handlePageID);
+      }
+
+      Message msgA = Message(
+          id: '1',
+          pageID: handlePageID,
+          role: MessageRole.assistant,
+          type: MsgType.image,
+          content: response.data,
+          timestamp: DateTime.now());
+      pages.addMessage(handlePageID, msgA);
+    } else {
+      try {
+        var chatData = {
+          "model": pages.currentPage?.modelVersion,
+          "question": pages.getPage(handlePageID).msgsToMap()
+        };
+        final stream = chatServer.connect(
+          sseChatUrl,
+          "POST",
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream'
+          },
+          body: jsonEncode(chatData),
+        );
+        stream.listen((data) {
+          if (append == false) {
+            Message msgA = Message(
+                id: '1',
+                pageID: handlePageID,
+                role: MessageRole.assistant,
+                type: MsgType.text,
+                content: data,
+                timestamp: DateTime.now());
+            pages.addMessage(handlePageID, msgA);
+          } else {
+            pages.appendMessage(handlePageID, data);
+          }
+          pages.getPage(handlePageID).onGenerating = true;
+          append = true;
+        }, onError: (e) {
+          debugPrint('SSE error: $e');
+          pages.getPage(handlePageID).onGenerating = false;
+        }, onDone: () {
+          debugPrint('SSE complete');
+          if (pages.getPage(handlePageID).title == "Chat $handlePageID") {
+            titleSummery(pages, handlePageID);
+          }
+          pages.getPage(handlePageID).onGenerating = false;
+        });
+      } catch (e) {
+        debugPrint("error: $e");
+        pages.getPage(handlePageID).onGenerating = false;
+      }
     }
   }
 }
