@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 
 import '../utils/constants.dart';
@@ -34,10 +37,8 @@ class MessageBox extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (val["file"] != null)
-                      Image.network(val["file"]!.path,
-                          height: 300, width: 300, fit: BoxFit.cover),
-                    displayContent(context)
+                    if (val["file"] != null) inputedImage(context),
+                    messageContent(context)
                   ]),
             ),
           ),
@@ -46,30 +47,66 @@ class MessageBox extends StatelessWidget {
     );
   }
 
-  Widget displayContent(BuildContext context) {
+  Widget inputedImage(BuildContext context) {
+    return GestureDetector(
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  //child: Container(
+                  child: Image.network(val["file"]!.path),
+                );
+              });
+        },
+        onLongPressStart: (details) {
+          _showDownloadMenu(context, details.globalPosition, val["file"]!.path);
+        },
+        child: Image.network(val["file"]!.path,
+            height: 250, width: 200, fit: BoxFit.cover));
+  }
+
+  Widget messageContent(BuildContext context) {
+    String imageBase64Str = val['content'];
+    String imageB64Url = "data:image/png;base64,$imageBase64Str";
     if (val["type"] == MsgType.image) {
-      return Image.network(
-        val['content'],
-        height: 512,
-        width: 512,
-        loadingBuilder: (BuildContext context, Widget child,
-            ImageChunkEvent? loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              color: AppColors.appBarBackground,
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-        errorBuilder:
-            (BuildContext context, Object exception, StackTrace? stackTrace) {
-          return const Text('image load error');
-        },
-      );
+      return GestureDetector(
+          onTap: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                      //child: Container(
+                      child: Image.memory(base64Decode(
+                          val['content'])) //Image.network(val['content']),
+                      );
+                });
+          },
+          onLongPressStart: (details) {
+            _showDownloadMenu(context, details.globalPosition, imageB64Url);
+          },
+          child: Image.network(
+            imageB64Url,
+            height: 250,
+            width: 200,
+            loadingBuilder: (BuildContext context, Widget child,
+                ImageChunkEvent? loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.appBarBackground,
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              );
+            },
+            errorBuilder: (BuildContext context, Object exception,
+                StackTrace? stackTrace) {
+              return const Text('image load error');
+            },
+          ));
     } else {
       return SelectableText(val['content'],
           //overflow: TextOverflow.ellipsis,
@@ -77,5 +114,49 @@ class MessageBox extends StatelessWidget {
           maxLines: null,
           style: const TextStyle(fontSize: 18.0, color: AppColors.msgText));
     }
+  }
+
+  void _showDownloadMenu(
+      BuildContext context, Offset position, String imageUrl) {
+    final RenderBox? overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    final RelativeRect positionRect = RelativeRect.fromLTRB(
+      position.dx, // Left
+      position.dy, // Top
+      overlay!.size.width - position.dx, // Right
+      overlay.size.height - position.dy, // Bottom
+    );
+
+    showMenu(
+      context: context,
+      position: positionRect,
+      items: <PopupMenuEntry>[
+        const PopupMenuItem(
+          value: 'download',
+          child: ListTile(
+            leading: Icon(Icons.download),
+            title: Text("download"),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'share',
+          child: ListTile(
+            leading: Icon(Icons.share),
+            title: Text("share"),
+          ),
+        ),
+      ],
+    ).then((selectedValue) {
+      if (selectedValue == 'download') {
+        _downloadImage(imageUrl);
+      }
+    });
+  }
+
+  void _downloadImage(String imageUrl) {
+    // create HTML的Anchor Element
+    final html.AnchorElement anchor = html.AnchorElement(href: imageUrl);
+    anchor.download = "gptsave"; // optional: download name
+    anchor.click();
   }
 }
