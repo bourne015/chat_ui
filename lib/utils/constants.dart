@@ -36,7 +36,7 @@ class ModelVersion {
   static const String gptv40Dall = "dall-e-3";
 }
 
-enum MsgType { text, image }
+enum MsgType { text, image, mix }
 
 const double drawerWidth = 260;
 

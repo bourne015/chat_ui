@@ -1,3 +1,6 @@
+import 'dart:html' as html;
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
@@ -23,7 +26,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
   final _controller = TextEditingController();
   bool _hasInputContent = false;
   XFile? _imageFile;
-  String? _imageBase64;
+  List<int>? _imageBytes;
 
   @override
   Widget build(BuildContext context) {
@@ -179,16 +182,18 @@ class _ChatInputFieldState extends State<ChatInputField> {
         _imageFile = null;
       }
     });
-    List<int> imageBytes = await _imageFile!.readAsBytes();
-    _imageBase64 = base64Encode(imageBytes);
+    _imageBytes = await _imageFile!.readAsBytes();
   }
 
   void titleSummery(Pages pages, int handlePageID) async {
     String q;
     if (pages.getPage(handlePageID).modelVersion == ModelVersion.gptv40Dall) {
       q = pages.getMessages(handlePageID)!.first.content;
-    } else {
+    } else if (pages.getMessages(handlePageID)!.length > 1) {
       q = pages.getMessages(handlePageID)![1].content;
+    } else {
+      //in case no input
+      return;
     }
     var chatData1 = {
       "model": ModelVersion.gptv35,
@@ -206,10 +211,10 @@ class _ChatInputFieldState extends State<ChatInputField> {
         id: '0',
         pageID: handlePageID,
         role: MessageRole.user,
-        type: MsgType.text,
+        type: _imageFile == null ? MsgType.text : MsgType.mix,
         content: text,
         file: _imageFile,
-        fileBase64: _imageBase64,
+        fileBytes: _imageBytes,
         timestamp: DateTime.now());
     pages.addMessage(handlePageID, msgQ);
 
@@ -219,7 +224,8 @@ class _ChatInputFieldState extends State<ChatInputField> {
       pages.getPage(handlePageID).onGenerating = true;
       final response = await dio.post(imageUrl, data: chatData1);
       pages.getPage(handlePageID).onGenerating = false;
-      if (pages.getPage(handlePageID).title == "Chat $handlePageID") {
+      if (response.statusCode == 200 &&
+          pages.getPage(handlePageID).title == "Chat $handlePageID") {
         titleSummery(pages, handlePageID);
       }
 

@@ -62,10 +62,13 @@ class ChatSSE {
       debugPrint("event end");
     });
     httpRequest.addEventListener('error', (event) {
-      streamController.addError(
-        httpRequest.responseText ?? httpRequest.status ?? 'err',
-      );
-      debugPrint("event error");
+      String status = httpRequest.status.toString();
+      String statusText = httpRequest.statusText ?? "Unknown error";
+      String responseText = httpRequest.responseText ?? 'No response text';
+      String errorMessage =
+          "Error Status: $status, Status Text: $statusText, Response Text: $responseText";
+      streamController.addError(errorMessage);
+      debugPrint("event error: $errorMessage");
     });
     httpRequest.send(body);
     return streamController.stream;

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../utils/constants.dart';
 
@@ -8,7 +11,7 @@ class Message {
   MsgType type;
   String content;
   XFile? file;
-  String? fileBase64;
+  List<int>? fileBytes;
   final DateTime timestamp;
 
   Message({
@@ -18,13 +21,20 @@ class Message {
     this.type = MsgType.text,
     required this.content,
     this.file,
-    this.fileBase64,
+    this.fileBytes,
     required this.timestamp,
   });
 
   Map<String, dynamic> toMap() {
     var res = <String, dynamic>{};
     if (file != null) {
+      final html.File htmlFile = html.File(
+        fileBytes!,
+        file!.name,
+        {'type': file!.mimeType},
+      );
+      String fileType = htmlFile.type;
+      String fileBase64 = base64Encode(fileBytes!);
       res = {
         'role': role,
         'content': [
@@ -32,7 +42,7 @@ class Message {
           {
             'type': 'image_url',
             'image_url': {
-              'url': "data:image/jpeg;base64,$fileBase64",
+              'url': "data:$fileType;base64,$fileBase64",
             },
           },
         ]
