@@ -41,6 +41,9 @@ dependencies:
   dual_screen: ^1.0.4
   provider: ^6.0.0
   image_picker: ^1.0.4
+  flutter_markdown: ^0.6.18+2
+  markdown: ^7.0.0
+  string_scanner: ^1.2.0
 
 dev_dependencies:
   flutter_test:

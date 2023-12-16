@@ -2,8 +2,12 @@ import 'dart:convert';
 import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:markdown/markdown.dart' as md;
 
 import '../utils/constants.dart';
+import '../utils/markdown_extentions.dart';
+import '../utils/syntax_hightlighter.dart';
 
 class MessageBox extends StatelessWidget {
   final Map val;
@@ -108,11 +112,28 @@ class MessageBox extends StatelessWidget {
             },
           ));
     } else {
-      return SelectableText(val['content'],
-          //overflow: TextOverflow.ellipsis,
-          //showCursor: false,
-          maxLines: null,
-          style: const TextStyle(fontSize: 18.0, color: AppColors.msgText));
+      return MarkdownBody(
+        data: val['content'], //markdownTest,
+        selectable: true,
+        syntaxHighlighter: Highlighter(),
+        //extensionSet: MarkdownExtensionSet.githubFlavored.value,
+        extensionSet: md.ExtensionSet(
+          md.ExtensionSet.gitHubFlavored.blockSyntaxes,
+          <md.InlineSyntax>[
+            md.EmojiSyntax(),
+            ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes
+          ],
+        ),
+        styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+        styleSheet: MarkdownStyleSheet(
+            //h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            //h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            p: const TextStyle(fontSize: 17.0, color: AppColors.msgText),
+            a: const TextStyle(color: Colors.blue)),
+        builders: {
+          'code': CodeBlockBuilder(context),
+        },
+      );
     }
   }
 
