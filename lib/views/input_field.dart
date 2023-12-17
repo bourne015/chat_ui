@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../models/pages.dart';
 import '../models/chat.dart';
@@ -51,7 +52,9 @@ class _ChatInputFieldState extends State<ChatInputField> {
                   pages.defaultModelVersion == ModelVersion.gptv40Vision))
             pickButton(context),
           inputField(context),
-          sendButton(context),
+          (!pages.displayInitPage && pages.currentPage!.onGenerating)
+              ? generatingAnimation(context)
+              : sendButton(context),
         ],
       ),
     );
@@ -132,6 +135,15 @@ class _ChatInputFieldState extends State<ChatInputField> {
           size: 20,
         ),
         onPressed: _pickImage);
+  }
+
+  Widget generatingAnimation(BuildContext context) {
+    return Container(
+        margin: const EdgeInsets.only(right: 7),
+        child: const SpinKitSpinningLines(
+          color: AppColors.generatingAnimation,
+          size: AppSize.generatingAnimation,
+        ));
   }
 
   Widget sendButton(BuildContext context) {
@@ -252,6 +264,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
           },
           body: jsonEncode(chatData),
         );
+        pages.getPage(handlePageID).onGenerating = true;
         stream.listen((data) {
           if (append == false) {
             Message msgA = Message(

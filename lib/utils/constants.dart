@@ -21,6 +21,12 @@ class AppColors {
   static final userMsgBox = Colors.purple[400];
   static const aiMsgBox = Colors.white;
   static const msgText = Colors.black;
+
+  static const generatingAnimation = Colors.black;
+}
+
+class AppSize {
+  static const double generatingAnimation = 30.0;
 }
 
 class MessageRole {
