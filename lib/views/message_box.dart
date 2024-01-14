@@ -71,70 +71,84 @@ class MessageBox extends StatelessWidget {
   }
 
   Widget messageContent(BuildContext context) {
+    if (val["type"] == MsgType.image) {
+      return contentImage(context);
+    } else {
+      return contentText(context);
+    }
+  }
+
+  Widget contentText(BuildContext context) {
+    return MarkdownBody(
+      data: val['content'], //markdownTest,
+      selectable: true,
+      syntaxHighlighter: Highlighter(),
+      //extensionSet: MarkdownExtensionSet.githubFlavored.value,
+      extensionSet: md.ExtensionSet(
+        md.ExtensionSet.gitHubFlavored.blockSyntaxes,
+        <md.InlineSyntax>[
+          md.EmojiSyntax(),
+          ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes
+        ],
+      ),
+      styleSheetTheme: MarkdownStyleSheetBaseTheme.platform,
+      styleSheet: MarkdownStyleSheet(
+        //h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        //h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        // p: const TextStyle(fontSize: 17.0, color: AppColors.msgText),
+        // a: const TextStyle(color: Colors.blue),
+        code: const TextStyle(
+          inherit: false,
+          color: AppColors.msgText,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      builders: {
+        'code': CodeBlockBuilder(context, Highlighter()),
+      },
+    );
+  }
+
+  Widget contentImage(BuildContext context) {
     String imageBase64Str = val['content'];
     String imageB64Url = "data:image/png;base64,$imageBase64Str";
-    if (val["type"] == MsgType.image) {
-      return GestureDetector(
-          onTap: () {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return Dialog(
-                      //child: Container(
-                      child: Image.memory(base64Decode(
-                          val['content'])) //Image.network(val['content']),
-                      );
-                });
-          },
-          onLongPressStart: (details) {
-            _showDownloadMenu(context, details.globalPosition, imageB64Url);
-          },
-          child: Image.network(
-            imageB64Url,
-            height: 250,
-            width: 200,
-            loadingBuilder: (BuildContext context, Widget child,
-                ImageChunkEvent? loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.appBarBackground,
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
-                ),
-              );
-            },
-            errorBuilder: (BuildContext context, Object exception,
-                StackTrace? stackTrace) {
-              return const Text('image load error');
-            },
-          ));
-    } else {
-      return MarkdownBody(
-        data: val['content'], //markdownTest,
-        selectable: true,
-        syntaxHighlighter: Highlighter(),
-        //extensionSet: MarkdownExtensionSet.githubFlavored.value,
-        extensionSet: md.ExtensionSet(
-          md.ExtensionSet.gitHubFlavored.blockSyntaxes,
-          <md.InlineSyntax>[
-            md.EmojiSyntax(),
-            ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes
-          ],
-        ),
-        styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-        styleSheet: MarkdownStyleSheet(
-            //h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            //h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            p: const TextStyle(fontSize: 17.0, color: AppColors.msgText),
-            a: const TextStyle(color: Colors.blue)),
-        builders: {
-          'code': CodeBlockBuilder(context),
+    return GestureDetector(
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                    //child: Container(
+                    child: Image.memory(base64Decode(
+                        val['content'])) //Image.network(val['content']),
+                    );
+              });
         },
-      );
-    }
+        onLongPressStart: (details) {
+          _showDownloadMenu(context, details.globalPosition, imageB64Url);
+        },
+        child: Image.network(
+          imageB64Url,
+          height: 250,
+          width: 200,
+          loadingBuilder: (BuildContext context, Widget child,
+              ImageChunkEvent? loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                color: AppColors.appBarBackground,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder:
+              (BuildContext context, Object exception, StackTrace? stackTrace) {
+            return const Text('image load error');
+          },
+        ));
   }
 
   void _showDownloadMenu(

@@ -23,6 +23,10 @@ class AppColors {
   static const msgText = Colors.black;
 
   static const generatingAnimation = Colors.black;
+
+  static const msgCodeTitleBG = Color.fromARGB(255, 75, 74, 74);
+  static const msgCodeTitle = Colors.white;
+  static const msgCodeBG = Color.fromARGB(255, 34, 34, 34);
 }
 
 class AppSize {

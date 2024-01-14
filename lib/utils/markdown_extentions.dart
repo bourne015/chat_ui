@@ -1,10 +1,10 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
 import 'package:markdown/markdown.dart' as md;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import '../utils/syntax_hightlighter.dart';
+import 'constants.dart';
 
 // ignore_for_file: public_member_api_docs
 
@@ -59,43 +59,54 @@ extension WrapAlignmentExtension on WrapAlignment {
 
 class CodeBlockBuilder extends MarkdownElementBuilder {
   final BuildContext context;
-  CodeBlockBuilder(this.context);
+  final Highlighter highlighter;
+  CodeBlockBuilder(this.context, this.highlighter);
   @override
-  Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
-    var language = '';
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    String language = '';
+    var lineCnt = '\n'.allMatches(element.textContent).length;
+
     if (element.attributes['class'] != null) {
       language = element.attributes['class']!.split('-').last;
-    } else {
-      // handle in case single backquote is alse 'code'
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Text(element.textContent, style: preferredStyle),
-      );
+    } else if (element.attributes['class'] == null && lineCnt <= 1) {
+      // handle single line 'code'
+      return null;
+      // return Padding(
+      //   padding: const EdgeInsets.symmetric(horizontal: 2),
+      //   child: SelectableText(
+      //     element.textContent,
+      //     //style: preferredStyle,
+      //     style: const TextStyle(fontWeight: FontWeight.bold),
+      //   ),
+      // );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         codeTitleBar(context, language, element),
-        codeContent(context, element, preferredStyle),
+        codeContent(context, element, preferredStyle, highlighter),
       ],
     );
   }
 
   Widget codeTitleBar(BuildContext context, language, element) {
     return Container(
-      color: Colors.grey[300],
+      color: AppColors.msgCodeTitleBG,
       height: 32,
       padding: const EdgeInsets.only(left: 15, top: 1, bottom: 1),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(language.toUpperCase(),
-              style:
-                  const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              style: const TextStyle(
+                  color: AppColors.msgCodeTitle,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold)),
           IconButton(
             tooltip: "copy",
-            icon: const Icon(size: 18, Icons.copy),
+            icon:
+                const Icon(color: AppColors.msgCodeTitle, size: 18, Icons.copy),
             onPressed: () {
               Clipboard.setData(ClipboardData(text: element.textContent))
                   .then((value) => ScaffoldMessenger.of(context).showSnackBar(
@@ -111,15 +122,16 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
     );
   }
 
-  Widget codeContent(BuildContext context, element, preferredStyle) {
+  Widget codeContent(
+      BuildContext context, element, preferredStyle, highlighter) {
     return Container(
-      //color: Colors.grey[200],
+      color: AppColors.msgCodeBG,
       padding: const EdgeInsets.all(15),
-      child: SelectableText(
-        element.textContent,
-        style: preferredStyle,
-        cursorColor: Colors.blue,
-        showCursor: true,
+      child: SelectableText.rich(
+        highlighter.format(element.textContent),
+        //style: preferredStyle,
+        //cursorColor: Colors.blue,
+        //showCursor: true,
       ),
     );
   }
