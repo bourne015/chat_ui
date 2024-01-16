@@ -11,6 +11,7 @@ class AppColors {
   static const chatPageTitleToken = Colors.white;
   static final modelSelectorBackground = Colors.grey[200];
   static const modelSelected = Colors.white;
+  static const subTitle = Colors.grey;
 
   static final drawerTabSelected = Colors.grey[300];
   static const drawerDivider = Colors.black12;
@@ -59,4 +60,4 @@ A Demo for ChatGPT.
 Please refresh the page if reached max tokens or don't need chat context
 """;
 
-const String appVersion = "0.1.2";
+const String appVersion = "0.1.3";

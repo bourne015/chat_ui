@@ -87,7 +87,7 @@ class InitPageState extends State<InitPage> {
         },
         children: <String, Widget>{
           'GPT-3.5': Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 45, vertical: 13),
             child: Row(children: [
               Icon(
                 Icons.flash_on,
@@ -99,7 +99,7 @@ class InitPageState extends State<InitPage> {
             ]),
           ),
           'GPT-4.0': Padding(
-            padding: const EdgeInsets.only(left: 12, top: 10, bottom: 10),
+            padding: const EdgeInsets.only(left: 35),
             child: Row(children: [
               Icon(
                 Icons.workspaces,
@@ -108,7 +108,7 @@ class InitPageState extends State<InitPage> {
                     : Colors.grey,
               ),
               const Text('GPT-4.0'),
-              const SizedBox(width: 3),
+              const SizedBox(width: 8),
               if (pages.defaultModelVersion != ModelVersion.gptv35)
                 dropdownMenu(context),
             ]),
@@ -120,24 +120,16 @@ class InitPageState extends State<InitPage> {
 
   Widget dropdownMenu(BuildContext context) {
     Pages pages = Provider.of<Pages>(context);
-
-    return DropdownButton<String>(
-      value: dropdownValue,
-      iconSize: 0,
-      alignment: Alignment.bottomRight,
-      isDense: true,
-      icon: const Icon(
-        Icons.arrow_drop_down,
-        size: 15,
-      ),
-      elevation: 50,
-      style: const TextStyle(color: Colors.deepPurple),
-      underline: Container(
-        height: 0,
-        color: Colors.deepPurpleAccent,
-      ),
-      onChanged: (String? value) {
-        //This is called when the user selects an item.
+    return PopupMenuButton<String>(
+      initialValue: dropdownValue,
+      tooltip: "functions",
+      //icon: Icon(color: Colors.grey, size: 10, Icons.south),
+      icon: CircleAvatar(
+          radius: 12,
+          child: Text(dropdownValue[0],
+              style: const TextStyle(fontSize: 10.5, color: Colors.grey))),
+      padding: const EdgeInsets.only(left: 2),
+      onSelected: (String value) {
         if (value == gpt4Sub[0]) {
           pages.defaultModelVersion = ModelVersion.gptv40;
         } else if (value == gpt4Sub[1]) {
@@ -145,14 +137,45 @@ class InitPageState extends State<InitPage> {
         } else {
           pages.defaultModelVersion = ModelVersion.gptv40Dall;
         }
-        dropdownValue = value!;
+        dropdownValue = value;
       },
-      items: gpt4Sub.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
+      position: PopupMenuPosition.over,
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: "Basic",
+          child: ListTile(
+            leading: CircleAvatar(child: Text('B')),
+            title: Text("Basic"),
+            subtitle: Text(
+              'Basic chatgpt',
+              style: TextStyle(color: AppColors.subTitle),
+            ),
+            //trailing: Icon(Icons.favorite_rounded),
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: "Vision",
+          child: ListTile(
+            leading: CircleAvatar(child: Text('V')),
+            title: Text("Vision"),
+            subtitle: Text(
+              'To recognise image. Long press to download image',
+              style: TextStyle(color: AppColors.subTitle),
+            ),
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: "DALL",
+          child: ListTile(
+            leading: CircleAvatar(child: Text('D')),
+            title: Text("DALL·E 3"),
+            subtitle: Text(
+              'To generate image',
+              style: TextStyle(color: AppColors.subTitle),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
