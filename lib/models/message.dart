@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:html' as html;
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../utils/constants.dart';
 

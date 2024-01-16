@@ -73,12 +73,20 @@ class MessageBox extends StatelessWidget {
   Widget messageContent(BuildContext context) {
     if (val["type"] == MsgType.image) {
       return contentImage(context);
+    } else if (val['role'] == MessageRole.user) {
+      return SelectableText(
+        val['content'],
+        //overflow: TextOverflow.ellipsis,
+        //showCursor: false,
+        maxLines: null,
+        style: const TextStyle(fontSize: 17.0, color: AppColors.msgText),
+      );
     } else {
-      return contentText(context);
+      return contentMarkdown(context);
     }
   }
 
-  Widget contentText(BuildContext context) {
+  Widget contentMarkdown(BuildContext context) {
     return MarkdownBody(
       data: val['content'], //markdownTest,
       selectable: true,
